@@ -3,6 +3,9 @@ import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
 import { HomePage } from '@/pages/Home'
 import { AboutPage } from '@/pages/About'
+import { AdoptPage } from '@/pages/Adopt'
+import { FoundationsPage } from '@/pages/Foundations'
+import { FoundationDetailPage } from '@/pages/FoundationDetail'
 
 function App() {
   return (
@@ -13,7 +16,9 @@ function App() {
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/nosotros" element={<AboutPage />} />
-            {/* Añadir más rutas aquí */}
+            <Route path="/adoptar" element={<AdoptPage />} />
+            <Route path="/fundaciones" element={<FoundationsPage />} />
+            <Route path="/fundaciones/:id" element={<FoundationDetailPage />} />
           </Routes>
         </main>
         <Footer />

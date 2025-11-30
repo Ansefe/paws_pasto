@@ -28,6 +28,33 @@ La plataforma se aleja de la estética triste o excesivamente urgente que a vece
 * **Estética Visual:** Un diseño "blando" y amable, utilizando colores cálidos (amarillos/naranjas suaves) y frescos (azules cielo) que inviten a navegar sin generar ansiedad.
 * **Enfoque Geográfico:** Hiper-localizado en Pasto para garantizar que las adopciones y el apoyo sean logísticamente viables y fomenten la comunidad local.
 
+#### 🐾 Narrativa Inversa: "Los Animales Adoptan Humanos"
+
+Un diferenciador clave de HogarPeludo es el **enfoque narrativo inverso**. En lugar de presentar a los animales como seres pasivos esperando ser "elegidos", les damos voz y protagonismo. **Son ellos quienes buscan a su humano ideal**.
+
+**¿Por qué este enfoque?**
+- Humaniza la experiencia y crea una conexión emocional más profunda.
+- Reduce la percepción de "compra" o "selección de producto".
+- Genera curiosidad y engagement con frases inesperadas.
+- Refuerza el mensaje de que adoptar es un compromiso mutuo.
+
+**Ejemplos de comunicación:**
+
+| Contexto | Mensaje Tradicional | Mensaje HogarPeludo |
+|----------|---------------------|---------------------|
+| Ficha del animal | "Luna está en adopción" | "¡Hola! Estoy buscando a mi humano perfecto" |
+| CTA principal | "Solicitar adopción" | "Postúlate para que Luna te adopte" |
+| Requisitos | "Requisitos de adopción" | "Lo que busco en mi futuro humano" |
+| Estado en proceso | "En proceso de adopción" | "Ya estoy conociendo a alguien especial" |
+| WhatsApp | "Contactar fundación" | "Háblale a mi cuidador" |
+| Favoritos | "Agregar a favoritos" | "¿Te robé el corazón?" |
+
+**Tono en las fichas de animales:**
+- Los animales "hablan" en primera persona.
+- Cuentan su propia historia con personalidad.
+- Expresan qué tipo de familia buscan.
+- Usan frases como: "Mi corazón tiene espacio para ti", "¿Serás tú quien complete mi manada?"
+
 ---
 
 ### 3. Roles de Usuario y Permisos

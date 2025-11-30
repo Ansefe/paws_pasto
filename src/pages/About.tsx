@@ -466,7 +466,7 @@ export function AboutPage() {
                   </Button>
                 </Link>
                 <Link to="/fundaciones">
-                  <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10 rounded-full px-8">
+                  <Button size="lg" variant="ghost" className="border-2 border-white/70 text-white bg-transparent hover:bg-white/10 rounded-full px-8">
                     Ver Fundaciones
                   </Button>
                 </Link>
