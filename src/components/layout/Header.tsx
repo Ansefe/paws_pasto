@@ -9,24 +9,38 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet"
 import { motion } from "framer-motion"
+import { useState, useEffect } from "react"
 
 const navLinks = [
   { to: "/", label: "Inicio" },
   { to: "/adoptar", label: "Adoptar" },
   { to: "/fundaciones", label: "Fundaciones" },
+  { to: "/nosotros", label: "Nosotros" },
   { to: "/donar", label: "Donar" },
 ]
 
 export function Header() {
   const location = useLocation()
   const isHome = location.pathname === "/"
+  const [scrolled, setScrolled] = useState(false)
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 50)
+    }
+    window.addEventListener("scroll", handleScroll)
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [])
+
+  // El header es transparente solo en home Y cuando no se ha hecho scroll
+  const isTransparent = isHome && !scrolled
 
   return (
     <motion.header 
-      className={`fixed top-0 z-50 w-full transition-all duration-300 ${
-        isHome 
-          ? "bg-transparent" 
-          : "bg-white/80 backdrop-blur-lg border-b border-gray-200/50 shadow-sm"
+      className={`fixed top-0 z-50 w-full transition-all duration-300 border-b ${
+        isTransparent 
+          ? "bg-transparent border-transparent" 
+          : "bg-white/95 backdrop-blur-lg border-gray-200/50 shadow-sm"
       }`}
       initial={{ y: -100 }}
       animate={{ y: 0 }}
@@ -44,9 +58,9 @@ export function Header() {
             </div>
           </motion.div>
           <span className={`text-xl font-bold transition-colors ${
-            isHome ? "text-white" : "text-gray-800"
+            isTransparent ? "text-white" : "text-gray-800"
           }`}>
-            Hogar<span className="text-cyan-500">Peludo</span>
+            Hogar<span className={isTransparent ? "text-brand-yellow" : "text-brand-sky"}>Peludo</span>
           </span>
         </Link>
 
@@ -57,7 +71,7 @@ export function Header() {
               key={link.to}
               to={link.to} 
               className={`relative px-4 py-2 text-sm font-medium transition-colors rounded-full ${
-                isHome 
+                isTransparent 
                   ? "text-white/90 hover:text-white hover:bg-white/10" 
                   : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
               }`}
@@ -71,7 +85,7 @@ export function Header() {
               variant="ghost" 
               size="icon"
               className={`rounded-full ${
-                isHome 
+                isTransparent 
                   ? "text-white hover:bg-white/10" 
                   : "text-gray-600 hover:bg-gray-100"
               }`}
@@ -93,7 +107,7 @@ export function Header() {
               variant="ghost" 
               size="icon"
               className={`rounded-full ${
-                isHome ? "text-white hover:bg-white/10" : ""
+                isTransparent ? "text-white hover:bg-white/10" : ""
               }`}
             >
               <Menu className="h-6 w-6" />

@@ -376,8 +376,11 @@ export function HomePage() {
                 size="lg" 
                 variant="outline"
                 className="border-2 border-white/50 bg-transparent text-white hover:bg-white/10 font-semibold text-lg px-8 py-6 rounded-full transition-all duration-300"
+                asChild
               >
-                Conocer más
+                <Link to="/nosotros#fundaciones">
+                  Conocer más
+                </Link>
               </Button>
             </div>
           </motion.div>
