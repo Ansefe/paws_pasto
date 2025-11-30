@@ -35,7 +35,7 @@
 ## Estructura de Carpetas
 
 ```
-HogarPeludo/
+paws-pasto-adopciones/
 ├── docs/                    # Documentación del proyecto
 │   ├── README.md            # Índice de documentación
 │   ├── architecture.md      # Este archivo

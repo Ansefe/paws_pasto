@@ -60,7 +60,7 @@ export function Header() {
           <span className={`text-xl font-bold transition-colors ${
             isTransparent ? "text-white" : "text-gray-800"
           }`}>
-            Hogar<span className={isTransparent ? "text-brand-yellow" : "text-brand-sky"}>Peludo</span>
+            Paws<span className={isTransparent ? "text-brand-yellow" : "text-brand-sky"}>.</span>
           </span>
         </Link>
 
@@ -119,7 +119,7 @@ export function Header() {
                 <div className="w-8 h-8 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-lg flex items-center justify-center">
                   <PawPrint className="w-5 h-5 text-white" />
                 </div>
-                <span>HogarPeludo</span>
+                <span>Paws</span>
               </SheetTitle>
             </SheetHeader>
             <nav className="flex flex-col gap-2 mt-8">

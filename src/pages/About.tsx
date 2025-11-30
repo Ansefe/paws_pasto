@@ -21,7 +21,7 @@ import { Card, CardContent } from "@/components/ui/card"
 // Secciones de navegación
 const sections = [
   { id: "mision", label: "Nuestra Misión", icon: Target },
-  { id: "por-que", label: "¿Por qué HogarPeludo?", icon: Sparkles },
+  { id: "por-que", label: "¿Por qué Paws?", icon: Sparkles },
   { id: "como-funciona", label: "¿Cómo Funciona?", icon: PawPrint },
   { id: "fundaciones", label: "Para Fundaciones", icon: Building2 },
   { id: "adoptantes", label: "Para Adoptantes", icon: UserCheck },
@@ -100,7 +100,7 @@ export function AboutPage() {
               <span className="text-brand-sky">familias amorosas</span>
             </h1>
             <p className="text-lg text-gray-600 leading-relaxed">
-              HogarPeludo es el punto de referencia confiable para la adopción responsable 
+              Paws es el punto de referencia confiable para la adopción responsable 
               de mascotas en Pasto, Nariño. Somos el puente entre fundaciones, rescatistas 
               y personas dispuestas a dar un hogar.
             </p>
@@ -149,7 +149,7 @@ export function AboutPage() {
                 </div>
                 
                 <p className="text-gray-600 text-lg leading-relaxed mb-8">
-                  <strong className="text-gray-900">HogarPeludo</strong> nace con el objetivo de 
+                  <strong className="text-gray-900">Paws Pasto Adopciones</strong> nace con el objetivo de 
                   centralizar, dignificar y acelerar el proceso de adopción de animales de compañía 
                   en <strong className="text-gray-900">Pasto, Colombia</strong>.
                 </p>
@@ -198,7 +198,7 @@ export function AboutPage() {
                   <div className="w-12 h-12 bg-brand-yellow-100 rounded-2xl flex items-center justify-center">
                     <Sparkles className="w-6 h-6 text-brand-yellow-600" />
                   </div>
-                  <h2 className="text-3xl font-bold text-gray-900">¿Por qué HogarPeludo?</h2>
+                  <h2 className="text-3xl font-bold text-gray-900">¿Por qué Paws?</h2>
                 </div>
 
                 <p className="text-gray-600 text-lg leading-relaxed mb-8">
@@ -225,7 +225,7 @@ export function AboutPage() {
                     Enfoque en la Esperanza
                   </h3>
                   <p className="text-gray-600">
-                    Nos alejamos de la estética triste o excesivamente urgente. HogarPeludo se enfoca en la 
+                    Nos alejamos de la estética triste o excesivamente urgente. Paws se enfoca en la 
                     <strong> esperanza, la alegría de una nueva vida y la confianza</strong>. 
                     Nuestro tono es cercano, tierno y optimista.
                   </p>
@@ -314,7 +314,7 @@ export function AboutPage() {
                 </div>
 
                 <p className="text-gray-600 text-lg leading-relaxed mb-8">
-                  Si rescatas animales en Pasto, HogarPeludo te ofrece <strong className="text-gray-900">herramientas 
+                  Si rescatas animales en Pasto, Paws te ofrece <strong className="text-gray-900">herramientas 
                   gratuitas</strong> para dar visibilidad a tus peluditos y recibir donaciones de forma segura.
                 </p>
 

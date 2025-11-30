@@ -316,7 +316,7 @@ export function FoundationsPage() {
               ¿Eres una fundación o rescatista en Pasto?
             </h2>
             <p className="text-white/80 mb-8 max-w-xl mx-auto">
-              Únete a HogarPeludo y dale visibilidad a los animales que rescatas. 
+              Únete a Paws y dale visibilidad a los animales que rescatas. 
               Es completamente gratis.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">

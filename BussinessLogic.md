@@ -3,13 +3,13 @@ Este documento está diseñado para ser leído por stakeholders, socios o cualqu
 ***
 
 # Documento de Propuesta Estratégica y Lógica de Negocio
-## Proyecto: Plataforma de Adopción "HogarPeludo"
+## Proyecto: Plataforma de Adopción "Paws Pasto Adopciones"
 
 ---
 
 ### 1. Propósito y Visión
 
-**HogarPeludo** nace con el objetivo fundamental de centralizar, dignificar y acelerar el proceso de adopción de animales de compañía, inicialmente enfocado en la ciudad de **Pasto, Colombia**.
+**Paws Pasto Adopciones** nace con el objetivo fundamental de centralizar, dignificar y acelerar el proceso de adopción de animales de compañía, inicialmente enfocado en la ciudad de **Pasto, Colombia**.
 
 La plataforma busca resolver la desconexión existente entre las fundaciones locales que están saturadas, los animales invisibles que necesitan un hogar, y las personas dispuestas a adoptar o donar pero que no saben dónde acudir con confianza.
 
@@ -22,7 +22,7 @@ La plataforma busca resolver la desconexión existente entre las fundaciones loc
 
 ### 2. Identidad y Experiencia del Usuario
 
-La plataforma se aleja de la estética triste o excesivamente urgente que a veces caracteriza al sector. "HogarPeludo" se enfoca en la **esperanza, la alegría de una nueva vida y la confianza**.
+La plataforma se aleja de la estética triste o excesivamente urgente que a veces caracteriza al sector. "Paws Pasto Adopciones" se enfoca en la **esperanza, la alegría de una nueva vida y la confianza**.
 
 * **Tono de Voz:** Cercano, tierno, optimista pero siempre responsable y transparente.
 * **Estética Visual:** Un diseño "blando" y amable, utilizando colores cálidos (amarillos/naranjas suaves) y frescos (azules cielo) que inviten a navegar sin generar ansiedad.
@@ -30,7 +30,7 @@ La plataforma se aleja de la estética triste o excesivamente urgente que a vece
 
 #### 🐾 Narrativa Inversa: "Los Animales Adoptan Humanos"
 
-Un diferenciador clave de HogarPeludo es el **enfoque narrativo inverso**. En lugar de presentar a los animales como seres pasivos esperando ser "elegidos", les damos voz y protagonismo. **Son ellos quienes buscan a su humano ideal**.
+Un diferenciador clave de Paws Pasto Adopciones es el **enfoque narrativo inverso**. En lugar de presentar a los animales como seres pasivos esperando ser "elegidos", les damos voz y protagonismo. **Son ellos quienes buscan a su humano ideal**.
 
 **¿Por qué este enfoque?**
 - Humaniza la experiencia y crea una conexión emocional más profunda.
@@ -40,7 +40,7 @@ Un diferenciador clave de HogarPeludo es el **enfoque narrativo inverso**. En lu
 
 **Ejemplos de comunicación:**
 
-| Contexto | Mensaje Tradicional | Mensaje HogarPeludo |
+| Contexto | Mensaje Tradicional | Mensaje Paws Pasto Adopciones |
 |----------|---------------------|---------------------|
 | Ficha del animal | "Luna está en adopción" | "¡Hola! Estoy buscando a mi humano perfecto" |
 | CTA principal | "Solicitar adopción" | "Postúlate para que Luna te adopte" |
@@ -59,7 +59,7 @@ Un diferenciador clave de HogarPeludo es el **enfoque narrativo inverso**. En lu
 
 ### 3. Roles de Usuario y Permisos
 
-El ecosistema de HogarPeludo se compone de cuatro actores clave, cada uno con permisos y objetivos distintos:
+El ecosistema de Paws Pasto Adopciones se compone de cuatro actores clave, cada uno con permisos y objetivos distintos:
 
 #### A. Visitante Público (Sin Registro)
 Cualquier persona que entra a la web. Queremos que la barrera de entrada sea mínima.
@@ -76,7 +76,7 @@ Organizaciones o rescatistas independientes de Pasto que han pasado un filtro de
 * **Requisito:** Deben ser aprobados manualmente antes de poder publicar.
 
 #### D. Administrador de la Plataforma (Superusuario)
-El garante de la confianza en HogarPeludo.
+El garante de la confianza en Paws Pasto Adopciones.
 * **Qué puede hacer:** Su función principal es auditar. Recibe las solicitudes de nuevas fundaciones, revisa su documentación/credenciales y las aprueba o rechaza. Tiene la capacidad de moderar contenido si es necesario.
 
 ---
@@ -104,7 +104,7 @@ Para garantizar la seguridad de los adoptantes y donantes, las fundaciones no pu
 
 #### Flujo 3: Canalización de Donaciones
 
-HogarPeludo no procesa dinero directamente en una primera etapa, sino que actúa como un puente de confianza.
+Paws Pasto Adopciones no procesa dinero directamente en una primera etapa, sino que actúa como un puente de confianza.
 
 1.  El usuario navega al directorio de "Fundaciones Aliadas".
 2.  Solo las fundaciones previamente verificadas por el Administrador aparecen aquí.
@@ -115,4 +115,4 @@ HogarPeludo no procesa dinero directamente en una primera etapa, sino que actúa
 
 ### 5. Resumen de Valor
 
-HogarPeludo no es solo un catálogo de fotos; es un **ecosistema de confianza** diseñado para eliminar las barreras que impiden que los animales en Pasto encuentren un hogar, facilitando las conexiones correctas de la manera más tierna y eficiente posible.
+Paws Pasto Adopciones no es solo un catálogo de fotos; es un **ecosistema de confianza** diseñado para eliminar las barreras que impiden que los animales en Pasto encuentren un hogar, facilitando las conexiones correctas de la manera más tierna y eficiente posible.

@@ -2,7 +2,7 @@
 
 ## Visión General
 
-HogarPeludo usa **Supabase** como backend, que proporciona:
+Paws usa **Supabase** como backend, que proporciona:
 - PostgreSQL como base de datos relacional
 - Autenticación integrada (auth.users)
 - Row Level Security (RLS) para control de acceso

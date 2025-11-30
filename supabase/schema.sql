@@ -1,5 +1,5 @@
 -- =====================================================
--- HogarPeludo - Schema de Base de Datos para Supabase
+-- Paws Pasto Adopciones - Schema de Base de Datos para Supabase
 -- =====================================================
 -- Este script crea todas las tablas, enums y relaciones
 -- necesarias para la plataforma de adopción de animales.

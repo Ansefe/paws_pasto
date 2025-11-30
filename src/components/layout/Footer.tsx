@@ -21,7 +21,7 @@ export function Footer() {
                 <PawPrint className="w-6 h-6 text-white" />
               </div>
               <span className="text-xl font-bold text-white">
-                Hogar<span className="text-cyan-400">Peludo</span>
+                Paws<span className="text-cyan-400">.</span>
               </span>
             </Link>
             <p className="text-gray-400 mb-6 leading-relaxed">
@@ -74,8 +74,8 @@ export function Footer() {
               </li>
               <li className="flex items-start gap-3">
                 <Mail className="w-5 h-5 text-cyan-400 mt-0.5" />
-                <a href="mailto:contacto@hogarpeludo.com" className="text-gray-400 hover:text-cyan-400 transition-colors">
-                  contacto@hogarpeludo.com
+                <a href="mailto:contacto@pawspasto.com" className="text-gray-400 hover:text-cyan-400 transition-colors">
+                  contacto@pawspasto.com
                 </a>
               </li>
             </ul>
@@ -102,7 +102,7 @@ export function Footer() {
         {/* Bottom bar */}
         <div className="border-t border-gray-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-gray-500 text-sm">
-            © {new Date().getFullYear()} HogarPeludo. Hecho con 💙 para los peluditos.
+            © {new Date().getFullYear()} Paws Pasto Adopciones. Hecho con 💙 para los peluditos.
           </p>
           <div className="flex gap-6 text-sm">
             <Link to="/privacidad" className="text-gray-500 hover:text-gray-300 transition-colors">

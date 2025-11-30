@@ -216,7 +216,7 @@ Página informativa con navegación vertical por secciones.
 ### Secciones (con navegación lateral)
 
 1. **Nuestra Misión**
-   - Visión y propósito de HogarPeludo
+   - Visión y propósito de Paws
    - Iconos representativos
 
 2. **Nuestros Valores**

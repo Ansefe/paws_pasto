@@ -629,7 +629,7 @@ export function AdoptPage() {
             ¿Eres rescatista o fundación?
           </h2>
           <p className="text-gray-600 mb-6 max-w-lg mx-auto">
-            Únete a HogarPeludo y dale visibilidad a los animales que rescatas en Pasto.
+            Únete a Paws y dale visibilidad a los animales que rescatas en Pasto.
           </p>
           <Link to="/nosotros#fundaciones">
             <Button className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-full px-8">

@@ -1,5 +1,5 @@
 -- =====================================================
--- HogarPeludo - Datos de Prueba (Seed)
+-- Paws Pasto Adopciones - Datos de Prueba (Seed)
 -- =====================================================
 -- Este script inserta datos de ejemplo para probar
 -- todas las funcionalidades de la plataforma.
@@ -57,7 +57,7 @@ BEGIN
 INSERT INTO profiles (id, full_name, avatar_url, phone, role)
 VALUES (
   admin_id,
-  'Admin HogarPeludo',
+  'Admin Paws',
   NULL,
   '3001234567',
   'admin'

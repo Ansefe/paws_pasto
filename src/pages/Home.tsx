@@ -85,7 +85,7 @@ export function HomePage() {
               transition={{ delay: 0.3, type: "spring" }}
             >
               <Sparkles className="w-4 h-4 text-yellow-300" />
-              <span className="text-white/90 text-sm font-medium">+500 mascotas encontraron hogar</span>
+              <span className="text-white/90 text-sm font-medium">Pasto Adopciones</span>
             </motion.div>
           </motion.div>
 
@@ -190,7 +190,7 @@ export function HomePage() {
               ¿Por qué elegirnos?
             </span>
             <h2 className="text-4xl md:text-5xl font-bold mb-4">
-              Adopción <span className="text-primary">fácil</span> y <span className="text-secondary">segura</span>
+              Adopción <span className="text-primary">fácil</span> y <span className="text-emerald-500">segura</span>
             </h2>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
               Hacemos que encontrar a tu nuevo mejor amigo sea una experiencia increíble
@@ -357,7 +357,7 @@ export function HomePage() {
             <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
               ¿Rescatas animales? 
               <br />
-              <span className="text-yellow-300">Únete a HogarPeludo</span>
+              <span className="text-yellow-300">Únete a Paws</span>
             </h2>
             
             <p className="text-white/90 text-lg mb-10 max-w-xl mx-auto">
@@ -420,7 +420,7 @@ export function HomePage() {
                 bg: "bg-gradient-to-br from-pink-50 to-rose-50"
               },
               { 
-                quote: "Gracias a HogarPeludo encontramos a nuestro Michi. ¡No podemos estar más felices!", 
+                quote: "Gracias a Paws encontramos a nuestro Michi. ¡No podemos estar más felices!", 
                 name: "Carlos Muñoz", 
                 pet: "Adoptó a Michi 🐈",
                 bg: "bg-gradient-to-br from-cyan-50 to-blue-50"

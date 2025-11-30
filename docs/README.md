@@ -1,10 +1,10 @@
-# 📚 Documentación de HogarPeludo
+# 📚 Documentación de Paws Pasto Adopciones
 
 > Plataforma de adopción de mascotas para Pasto, Nariño, Colombia
 
 ## 🎯 Visión General
 
-**HogarPeludo** es una plataforma web diseñada para centralizar y facilitar la adopción de animales de compañía en Pasto, Colombia. Conecta fundaciones de rescate animal con personas interesadas en adoptar, creando un ecosistema de confianza donde los animales encuentran hogares y las fundaciones obtienen visibilidad.
+**Paws Pasto Adopciones** (o simplemente **Paws**) es una plataforma web diseñada para centralizar y facilitar la adopción de animales de compañía en Pasto, Colombia. Conecta fundaciones de rescate animal con personas interesadas en adoptar, creando un ecosistema de confianza donde los animales encuentran hogares y las fundaciones obtienen visibilidad.
 
 ### Propósito Principal
 - Dar visibilidad a animales rescatados que buscan hogar
@@ -41,7 +41,7 @@
 ```bash
 # Clonar el repositorio
 git clone <repo-url>
-cd HogarPeludo
+cd paws-pasto-adopciones
 
 # Instalar dependencias
 npm install
@@ -90,7 +90,7 @@ VITE_SUPABASE_ANON_KEY=tu-anon-key
 - **Body:** Nunito (texto general)
 
 ### Tono de Comunicación
-La plataforma usa un **tono inverso**: los animales "adoptan" a los humanos. Esto crea una conexión emocional más profunda y diferencia a HogarPeludo.
+La plataforma usa un **tono inverso**: los animales "adoptan" a los humanos. Esto crea una conexión emocional más profunda y diferencia a Paws.
 
 Ejemplos:
 - "¡Postúlate para que Luna te adopte!"

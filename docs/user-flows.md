@@ -95,7 +95,7 @@
 1. Click en "Háblale a mi cuidador"
 2. Abre WhatsApp con mensaje pre-llenado:
    ```
-   ¡Hola! Vi a [Nombre] en HogarPeludo y me encantaría conocer más...
+   ¡Hola! Vi a [Nombre] en Paws y me encantaría conocer más...
    ```
 3. Comunicación directa con la fundación
 
@@ -258,7 +258,7 @@
 
 ### Implementación en UI
 
-| Contexto | Tradicional | HogarPeludo |
+| Contexto | Tradicional | Paws |
 |----------|-------------|-------------|
 | Header modal | "[Nombre] en adopción" | "¡Hola! Soy [Nombre]" |
 | CTA | "Solicitar adopción" | "Postúlate para que [Nombre] te adopte" |

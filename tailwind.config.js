@@ -49,7 +49,7 @@ export default {
           foreground: "hsl(var(--card-foreground))",
         },
         // ========================================
-        // Colores de marca HogarPeludo
+        // Colores de marca Paws
         // ========================================
         "brand-sky": {
           50: "#e6f7fc",

@@ -146,7 +146,7 @@ export function FoundationDetailPage() {
         if (petsError) throw petsError
 
         setFoundation({
-          ...foundationData,
+          ...(foundationData as Foundation),
           pets: petsData as PetWithFoundation[]
         })
       } catch (err) {
@@ -292,7 +292,7 @@ export function FoundationDetailPage() {
                   <div className="flex flex-wrap gap-3">
                     {foundation.whatsapp_number && (
                       <a 
-                        href={`https://wa.me/${foundation.whatsapp_number}?text=${encodeURIComponent(`¡Hola! Vi su perfil en HogarPeludo y me gustaría conocer más sobre ${foundation.foundation_name}.`)}`}
+                        href={`https://wa.me/${foundation.whatsapp_number}?text=${encodeURIComponent(`¡Hola! Vi su perfil en Paws y me gustaría conocer más sobre ${foundation.foundation_name}.`)}`}
                         target="_blank"
                         rel="noopener noreferrer"
                       >

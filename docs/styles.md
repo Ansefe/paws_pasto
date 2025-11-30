@@ -2,7 +2,7 @@
 
 ## Visión de Marca
 
-HogarPeludo busca transmitir:
+Paws busca transmitir:
 - **Esperanza** y optimismo (no tristeza)
 - **Confianza** y seguridad
 - **Ternura** y calidez
@@ -120,7 +120,7 @@ text-xs                            /* 12px */
 
 ## Border Radius
 
-HogarPeludo usa bordes muy redondeados para transmitir suavidad.
+Paws usa bordes muy redondeados para transmitir suavidad.
 
 ```javascript
 // tailwind.config.js

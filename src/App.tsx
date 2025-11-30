@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
+import { FloatingBadge } from '@/components/FloatingBadge'
 import { HomePage } from '@/pages/Home'
 import { AboutPage } from '@/pages/About'
 import { AdoptPage } from '@/pages/Adopt'
@@ -22,6 +23,7 @@ function App() {
           </Routes>
         </main>
         <Footer />
+        <FloatingBadge />
       </div>
     </Router>
   )

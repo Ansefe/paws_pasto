@@ -1,4 +1,4 @@
-### 1. Identidad Visual y Branding: "HogarPeludo"
+### 1. Identidad Visual y Branding: "Paws Pasto Adopciones"
 
 He realizado una investigación rápida sobre paletas de colores para ONGs de animales y plataformas con tonos "tiernos". Queremos evitar el rojo (peligro/urgencia excesiva) y el gris excesivo (tristeza).
 
@@ -29,7 +29,7 @@ Tu petición sobre los usuarios no registrados es muy inteligente. Reduce la fri
     * Aquí implementaremos la doble vía que mencionas. El bloque principal de contacto tendrá dos botones prominentes:
     * **Botón Primario 1 (Plataforma - Requiere Login):** "Iniciar Proceso de Adopción". Al hacer clic, si no hay sesión, aparece el modal de "Para iniciar formalmente el proceso con la fundación, necesitamos tus datos. ¡Regístrate en un minuto!".
     * **Botón Primario 2 (Rápido - Sin Login):** "Contactar por WhatsApp". Este botón debe tener el icono de WhatsApp.
-        * *Funcionalidad:* Abre directamente la API de WhatsApp (`wa.me/numero_fundacion?text=Hola, vengo de HogarPeludo y me interesa...`).
+        * *Funcionalidad:* Abre directamente la API de WhatsApp (`wa.me/numero_fundacion?text=Hola, vengo de Paws Pasto Adopciones y me interesa...`).
         * *Pros:* Contacto inmediato, cero fricción.
         * *Contras:* La plataforma pierde el rastro de esa interacción (no sabremos si se adoptó gracias a ese clic). *Decisión de diseño:* Es un compromiso aceptable para una primera versión en Pasto, priorizando que los animales encuentren hogar rápido.
 
@@ -41,9 +41,9 @@ Estoy totalmente de acuerdo en no reinventar la rueda. Para un proyecto que nece
 
 **Recomendación: Tailwind CSS + Componentes "Headless" (ej. Shadcn/ui o Radix Primitives)**
 
-* **¿Por qué NO Material UI (MUI)?** MUI es excelente, pero tiene una estética muy marcada de "Google". Para lograr el look "tierno y personalizado" de HogarPeludo, tendríamos que luchar mucho contra los estilos por defecto de MUI, lo que añade complejidad.
+* **¿Por qué NO Material UI (MUI)?** MUI es excelente, pero tiene una estética muy marcada de "Google". Para lograr el look "tierno y personalizado" de Paws Pasto Adopciones, tendríamos que luchar mucho contra los estilos por defecto de MUI, lo que añade complejidad.
 * **¿Por qué Tailwind CSS?** Es un framework de utilidades. Nos permite aplicar *exactamente* nuestra paleta de colores, nuestras tipografías redondeadas y nuestros espaciados personalizados directamente en el HTML de React, sin escribir hojas de estilo gigantes. Es perfecto para crear un diseño único.
-* **¿Y la funcionalidad compleja (Modales, Dropdowns)?** Aquí entra la parte "Headless". Usaremos librerías como **Shadcn/ui** (que está muy de moda y se basa en Radix y Tailwind) o **Headless UI**. Estas librerías te dan la *lógica* y la *accesibilidad* del componente (cómo se abre un modal, cómo se navega con teclado), pero vienen sin estilos o con estilos mínimos hechos con Tailwind, listos para que nosotros les apliquemos la "capa de pintura" de HogarPeludo.
+* **¿Y la funcionalidad compleja (Modales, Dropdowns)?** Aquí entra la parte "Headless". Usaremos librerías como **Shadcn/ui** (que está muy de moda y se basa en Radix y Tailwind) o **Headless UI**. Estas librerías te dan la *lógica* y la *accesibilidad* del componente (cómo se abre un modal, cómo se navega con teclado), pero vienen sin estilos o con estilos mínimos hechos con Tailwind, listos para que nosotros les apliquemos la "capa de pintura" de Paws Pasto Adopciones.
 
 **Veredicto:** Usar **Tailwind CSS** como motor de estilos y una colección de componentes como **shadcn/ui** para acelerar el desarrollo de interfaces complejas manteniendo la libertad creativa.
 

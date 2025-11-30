@@ -2,7 +2,7 @@
 
 ## Visión General
 
-HogarPeludo usa una combinación de:
+Paws usa una combinación de:
 - **shadcn/ui**: Componentes base accesibles (basados en Radix UI)
 - **Componentes custom**: Específicos del dominio de adopción
 
@@ -27,7 +27,7 @@ import { Button } from "@/components/ui/button"
 <Button size="lg">Grande</Button>
 <Button size="icon"><Icon /></Button>
 
-// Estilos custom comunes en HogarPeludo
+// Estilos custom comunes en Paws
 <Button className="rounded-full bg-gradient-to-r from-cyan-500 to-blue-500">
   CTA Principal
 </Button>
