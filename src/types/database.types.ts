@@ -237,6 +237,29 @@ export interface Database {
           resolved_at?: string | null
         }
       }
+      site_settings: {
+        Row: {
+          id: string
+          key: string
+          value: Json
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          key: string
+          value: Json
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          key?: string
+          value?: Json
+          created_at?: string
+          updated_at?: string
+        }
+      }
     }
     Enums: {
       user_role: UserRole
@@ -264,4 +287,24 @@ export type PetWithFoundation = Pet & {
 // Tipo extendido de Foundation con conteo de mascotas
 export type FoundationWithPetCount = Foundation & {
   pet_count: number
+}
+
+// Tipo para la configuración del sitio
+export type SiteSetting = Database['public']['Tables']['site_settings']['Row']
+
+// Interface para la configuración completa del sitio
+export interface SiteConfig {
+  siteName: string
+  siteDescription: string
+  siteUrl: string
+  email: string
+  phone: string
+  whatsapp: string
+  address: string
+  instagram: string
+  facebook: string
+  tiktok: string
+  youtube: string
+  termsAndConditions: string
+  privacyPolicy: string
 }

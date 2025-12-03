@@ -1,9 +1,12 @@
 import { Link } from "react-router-dom"
-import { PawPrint, Heart, Instagram, Facebook, Mail, MapPin } from "lucide-react"
+import { PawPrint, Heart, Instagram, Facebook, Mail, MapPin, Phone } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { useSiteConfigContext } from "@/contexts/SiteConfigContext"
 
 export function Footer() {
+  const { config } = useSiteConfigContext()
+
   return (
     <footer className="relative overflow-hidden">
       {/* Fondo con gradiente suave */}
@@ -25,19 +28,28 @@ export function Footer() {
               </span>
             </Link>
             <p className="text-gray-400 mb-6 leading-relaxed">
-              Conectando corazones peludos con familias amorosas en Pasto y Nariño. 
-              Cada adopción es una nueva historia de amor. 💕
+              {config.siteDescription || "Conectando corazones peludos con familias amorosas en Pasto y Nariño."} 💕
             </p>
             <div className="flex gap-3">
-              <Button variant="ghost" size="icon" className="rounded-full bg-gray-800 hover:bg-cyan-500 text-gray-400 hover:text-white transition-all">
-                <Instagram className="w-5 h-5" />
-              </Button>
-              <Button variant="ghost" size="icon" className="rounded-full bg-gray-800 hover:bg-blue-500 text-gray-400 hover:text-white transition-all">
-                <Facebook className="w-5 h-5" />
-              </Button>
-              <Button variant="ghost" size="icon" className="rounded-full bg-gray-800 hover:bg-pink-500 text-gray-400 hover:text-white transition-all">
-                <Mail className="w-5 h-5" />
-              </Button>
+              {config.instagram && (
+                <a href={config.instagram} target="_blank" rel="noopener noreferrer">
+                  <Button variant="ghost" size="icon" className="rounded-full bg-gray-800 hover:bg-cyan-500 text-gray-400 hover:text-white transition-all">
+                    <Instagram className="w-5 h-5" />
+                  </Button>
+                </a>
+              )}
+              {config.facebook && (
+                <a href={config.facebook} target="_blank" rel="noopener noreferrer">
+                  <Button variant="ghost" size="icon" className="rounded-full bg-gray-800 hover:bg-blue-500 text-gray-400 hover:text-white transition-all">
+                    <Facebook className="w-5 h-5" />
+                  </Button>
+                </a>
+              )}
+              <a href={`mailto:${config.email}`}>
+                <Button variant="ghost" size="icon" className="rounded-full bg-gray-800 hover:bg-pink-500 text-gray-400 hover:text-white transition-all">
+                  <Mail className="w-5 h-5" />
+                </Button>
+              </a>
             </div>
           </div>
 
@@ -70,14 +82,22 @@ export function Footer() {
             <ul className="space-y-4">
               <li className="flex items-start gap-3">
                 <MapPin className="w-5 h-5 text-cyan-400 mt-0.5" />
-                <span className="text-gray-400">Pasto, Nariño, Colombia</span>
+                <span className="text-gray-400">{config.address || "Pasto, Nariño, Colombia"}</span>
               </li>
               <li className="flex items-start gap-3">
                 <Mail className="w-5 h-5 text-cyan-400 mt-0.5" />
-                <a href="mailto:contacto@pawspasto.com" className="text-gray-400 hover:text-cyan-400 transition-colors">
-                  contacto@pawspasto.com
+                <a href={`mailto:${config.email}`} className="text-gray-400 hover:text-cyan-400 transition-colors">
+                  {config.email}
                 </a>
               </li>
+              {config.phone && (
+                <li className="flex items-start gap-3">
+                  <Phone className="w-5 h-5 text-cyan-400 mt-0.5" />
+                  <a href={`tel:${config.phone}`} className="text-gray-400 hover:text-cyan-400 transition-colors">
+                    {config.phone}
+                  </a>
+                </li>
+              )}
             </ul>
           </div>
 

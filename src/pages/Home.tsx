@@ -1,7 +1,8 @@
 import { Button } from "@/components/ui/button"
 import { Link } from "react-router-dom"
-import { Heart, Home, Users, Search, ArrowRight, Sparkles, PawPrint } from "lucide-react"
+import { Heart, Home, Users, Search, ArrowRight, Sparkles, PawPrint, Loader2 } from "lucide-react"
 import { motion } from "framer-motion"
+import { useFeaturedPets } from "@/hooks/usePets"
 
 const fadeInUp = {
   initial: { opacity: 0, y: 60 },
@@ -40,6 +41,8 @@ const pawPositions = [
 ]
 
 export function HomePage() {
+  const { pets: featuredPets, loading: petsLoading } = useFeaturedPets(4)
+
   return (
     <div className="flex flex-col overflow-hidden">
       {/* Hero Section - Gradiente vibrante */}
@@ -71,102 +74,195 @@ export function HomePage() {
           ))}
         </div>
 
-        {/* Contenido principal */}
-        <div className="relative z-10 container mx-auto px-4 text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-          >
-            <motion.div 
-              className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-4 py-2 mb-6"
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: 0.3, type: "spring" }}
-            >
-              <Sparkles className="w-4 h-4 text-yellow-300" />
-              <span className="text-white/90 text-sm font-medium">Pasto Adopciones</span>
-            </motion.div>
-          </motion.div>
+        {/* Imagen de Pasto - Lado derecho con desvanecido usando mask */}
+        <motion.div 
+          className="hidden lg:block absolute right-0 top-0 w-[75%] h-full z-[5]"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1.2, delay: 0.3 }}
+          style={{
+            maskImage: 'linear-gradient(to right, transparent 0%, transparent 15%, rgba(0,0,0,0.1) 20%, rgba(0,0,0,0.3) 25%, rgba(0,0,0,0.6) 30%, rgba(0,0,0,0.8) 35%, black 45%, black 100%)',
+            WebkitMaskImage: 'linear-gradient(to right, transparent 0%, transparent 15%, rgba(0,0,0,0.1) 20%, rgba(0,0,0,0.3) 25%, rgba(0,0,0,0.6) 30%, rgba(0,0,0,0.8) 35%, black 45%, black 100%)',
+          }}
+        >
+          <img 
+            src="https://situr.narino.gov.co/storage/Clientes/situr_narino/principal/imagenes/contenidos/7284-3_Volcan_Galeras.jpg" 
+            alt="Volcán Galeras - Pasto, Nariño"
+            className="w-full h-full object-cover"
+          />
+          {/* Overlay para legibilidad general */}
+          <div className="absolute inset-0 bg-cyan-500/25" />
+          <div className="absolute inset-0 bg-gradient-to-t from-blue-600/30 to-transparent" />
+        </motion.div>
 
-          <motion.h1 
-            className="text-5xl md:text-7xl lg:text-8xl font-bold text-white mb-6 leading-tight"
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-          >
-            Encuentra a tu
-            <br />
-            <span className="relative">
-              <span className="relative z-10">compañero</span>
-              <motion.span 
-                className="absolute -bottom-2 left-0 right-0 h-4 bg-yellow-400/60 -z-0 rounded-full"
-                initial={{ scaleX: 0 }}
-                animate={{ scaleX: 1 }}
-                transition={{ delay: 1, duration: 0.6 }}
-              />
-            </span>
-            {" "}peludo 🐾
-          </motion.h1>
+        {/* Contenido principal con fotos */}
+        <div className="relative z-10 container mx-auto px-4">
+          <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-12">
+            
+            {/* Fotos apiladas estilo polaroid - Lado izquierdo */}
+            <div className="hidden lg:block absolute left-0 top-1/2 -translate-y-1/2 w-[500px] h-[600px]">
+              {/* Foto 1 - Grande, al fondo */}
+              <motion.div 
+                className="absolute bg-white p-4 pb-14 rounded-sm shadow-2xl"
+                style={{ 
+                  left: '-60px', 
+                  top: '0px',
+                  width: '320px',
+                }}
+                initial={{ opacity: 0, x: -100, rotate: -12 }}
+                animate={{ opacity: 1, x: 0, rotate: -12 }}
+                transition={{ duration: 0.8, delay: 0.2 }}
+                whileHover={{ scale: 1.05, rotate: -8, zIndex: 30 }}
+              >
+                <img 
+                  src="https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=500&h=400&fit=crop&crop=faces" 
+                  alt="Perros en refugio"
+                  className="w-full h-60 object-cover"
+                />
+                <p className="text-gray-600 text-base mt-3 font-handwriting text-center">Fundación Patitas 🐾</p>
+              </motion.div>
+              
+              {/* Foto 2 - Mediana, en medio */}
+              <motion.div 
+                className="absolute bg-white p-4 pb-12 rounded-sm shadow-2xl z-10"
+                style={{ 
+                  left: '120px', 
+                  top: '180px',
+                  width: '280px',
+                }}
+                initial={{ opacity: 0, x: -100, rotate: 8 }}
+                animate={{ opacity: 1, x: 0, rotate: 8 }}
+                transition={{ duration: 0.8, delay: 0.4 }}
+                whileHover={{ scale: 1.05, rotate: 4, zIndex: 30 }}
+              >
+                <img 
+                  src="https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=400&h=320&fit=crop&crop=faces" 
+                  alt="Gato en refugio"
+                  className="w-full h-48 object-cover"
+                />
+                <p className="text-gray-600 text-base mt-3 font-handwriting text-center">Michi esperando 😺</p>
+              </motion.div>
+              
+              {/* Foto 3 - Al frente */}
+              <motion.div 
+                className="absolute bg-white p-3 pb-10 rounded-sm shadow-2xl z-20"
+                style={{ 
+                  left: '30px', 
+                  top: '380px',
+                  width: '240px',
+                }}
+                initial={{ opacity: 0, x: -100, rotate: -6 }}
+                animate={{ opacity: 1, x: 0, rotate: -6 }}
+                transition={{ duration: 0.8, delay: 0.6 }}
+                whileHover={{ scale: 1.05, rotate: -2, zIndex: 30 }}
+              >
+                <img 
+                  src="https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=350&h=280&fit=crop&crop=faces" 
+                  alt="Perro feliz"
+                  className="w-full h-40 object-cover"
+                />
+                <p className="text-gray-500 text-sm mt-2 font-handwriting text-center">¡Adóptame! 🐕</p>
+              </motion.div>
+            </div>
 
-          <motion.p 
-            className="text-xl md:text-2xl text-white/90 mb-10 max-w-2xl mx-auto font-light"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.5 }}
-          >
-            Conectamos animales que buscan hogar con familias llenas de amor en Pasto y Nariño.
-          </motion.p>
+            {/* Contenido de texto - Centro */}
+            <div className="flex-1 text-center lg:ml-[420px] relative z-20">
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8 }}
+              >
+                <motion.div 
+                  className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-4 py-2 mb-6"
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 0.3, type: "spring" }}
+                >
+                  <Sparkles className="w-4 h-4 text-yellow-300" />
+                  <span className="text-white/90 text-sm font-medium">Pasto Adopciones</span>
+                </motion.div>
+              </motion.div>
 
-          <motion.div 
-            className="flex flex-col sm:flex-row gap-4 justify-center items-center"
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.7 }}
-          >
-            <Button 
-              size="lg" 
-              className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold text-lg px-8 py-6 rounded-full shadow-lg shadow-yellow-400/30 hover:shadow-xl hover:shadow-yellow-400/40 transition-all duration-300 hover:scale-105"
-              asChild
-            >
-              <Link to="/adoptar" className="flex items-center gap-2">
-                <Search className="w-5 h-5" />
-                Ver Mascotas en Adopción
-                <ArrowRight className="w-5 h-5" />
-              </Link>
-            </Button>
-            <Button 
-              size="lg" 
-              variant="outline"
-              className="border-2 border-white/50 bg-white/10 backdrop-blur-sm text-white hover:bg-white hover:text-gray-900 font-semibold text-lg px-8 py-6 rounded-full transition-all duration-300 hover:scale-105"
-              asChild
-            >
-              <Link to="/fundaciones">Conoce las Fundaciones</Link>
-            </Button>
-          </motion.div>
+              <motion.h1 
+                className="text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight"
+                initial={{ opacity: 0, y: 50 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.2 }}
+              >
+                Encuentra a tu
+                <br />
+                <span className="relative">
+                  <span className="relative z-10">compañero</span>
+                  <motion.span 
+                    className="absolute -bottom-2 left-0 right-0 h-4 bg-yellow-400/60 -z-0 rounded-full"
+                    initial={{ scaleX: 0 }}
+                    animate={{ scaleX: 1 }}
+                    transition={{ delay: 1, duration: 0.6 }}
+                  />
+                </span>
+                {" "}peludo 🐾
+              </motion.h1>
 
-          {/* Stats rápidos */}
-          <motion.div 
-            className="mt-16 grid grid-cols-3 gap-8 max-w-lg mx-auto"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 1 }}
-          >
-            {[
-              { number: "500+", label: "Adoptados" },
-              { number: "25+", label: "Fundaciones" },
-              { number: "1.2k", label: "Familias felices" },
-            ].map((stat, i) => (
-              <div key={i} className="text-center">
-                <div className="text-3xl md:text-4xl font-bold text-white">{stat.number}</div>
-                <div className="text-white/70 text-sm">{stat.label}</div>
-              </div>
-            ))}
-          </motion.div>
+              <motion.p 
+                className="text-xl md:text-2xl text-white/90 mb-10 max-w-2xl mx-auto font-light"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5 }}
+              >
+                Conectamos animales que buscan hogar con familias llenas de amor en Pasto y Nariño.
+              </motion.p>
+
+              <motion.div 
+                className="flex flex-col sm:flex-row gap-4 justify-center items-center"
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.7 }}
+              >
+                <Button 
+                  size="lg" 
+                  className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold text-lg px-8 py-6 rounded-full shadow-lg shadow-yellow-400/30 hover:shadow-xl hover:shadow-yellow-400/40 transition-all duration-300 hover:scale-105"
+                  asChild
+                >
+                  <Link to="/adoptar" className="flex items-center gap-2">
+                    <Search className="w-5 h-5" />
+                    Ver Mascotas en Adopción
+                    <ArrowRight className="w-5 h-5" />
+                  </Link>
+                </Button>
+                <Button 
+                  size="lg" 
+                  variant="outline"
+                  className="border-2 border-white/50 bg-white/10 backdrop-blur-sm text-white hover:bg-white hover:text-gray-900 font-semibold text-lg px-8 py-6 rounded-full transition-all duration-300 hover:scale-105"
+                  asChild
+                >
+                  <Link to="/fundaciones">Conoce las Fundaciones</Link>
+                </Button>
+              </motion.div>
+
+              {/* Stats rápidos */}
+              <motion.div 
+                className="mt-12 grid grid-cols-3 gap-6 max-w-md mx-auto"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 1 }}
+              >
+                {[
+                  { number: "500+", label: "Adoptados" },
+                  { number: "25+", label: "Fundaciones" },
+                  { number: "1.2k", label: "Familias felices" },
+                ].map((stat, i) => (
+                  <div key={i} className="text-center">
+                    <div className="text-3xl md:text-4xl font-bold text-white">{stat.number}</div>
+                    <div className="text-white/70 text-sm">{stat.label}</div>
+                  </div>
+                ))}
+              </motion.div>
+            </div>
+          </div>
         </div>
 
         {/* Ola decorativa inferior */}
-        <div className="absolute bottom-0 left-0 right-0">
+        <div className="absolute bottom-0 left-0 right-0 z-20">
           <svg viewBox="0 0 1440 120" className="w-full h-auto">
             <path 
               fill="hsl(var(--background))" 
@@ -270,45 +366,68 @@ export function HomePage() {
             </p>
           </motion.div>
 
-          {/* Grid de mascotas placeholder */}
-          <motion.div 
-            className="grid grid-cols-2 md:grid-cols-4 gap-6"
-            variants={staggerContainer}
-            initial="initial"
-            whileInView="animate"
-            viewport={{ once: true }}
-          >
-            {[
-              { name: "Luna", type: "Perrita", age: "2 años", emoji: "🐕" },
-              { name: "Michi", type: "Gatito", age: "1 año", emoji: "🐈" },
-              { name: "Rocky", type: "Perrito", age: "3 años", emoji: "🐕‍🦺" },
-              { name: "Nala", type: "Gatita", age: "6 meses", emoji: "😺" },
-            ].map((pet, i) => (
-              <motion.div
-                key={i}
-                variants={scaleIn}
-                whileHover={{ scale: 1.05 }}
-                className="group cursor-pointer"
-              >
-                <div className="bg-white rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300">
-                  <div className="aspect-square bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center text-7xl group-hover:scale-110 transition-transform duration-500">
-                    {pet.emoji}
-                  </div>
-                  <div className="p-4">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h3 className="font-bold text-lg">{pet.name}</h3>
-                        <p className="text-muted-foreground text-sm">{pet.type} • {pet.age}</p>
+          {/* Grid de mascotas desde la base de datos */}
+          {petsLoading ? (
+            <div className="flex justify-center items-center py-20">
+              <Loader2 className="w-10 h-10 text-primary animate-spin" />
+            </div>
+          ) : featuredPets.length === 0 ? (
+            <div className="text-center py-20">
+              <p className="text-muted-foreground text-lg">No hay mascotas disponibles en este momento</p>
+            </div>
+          ) : (
+            <motion.div 
+              className="grid grid-cols-2 md:grid-cols-4 gap-6"
+              variants={staggerContainer}
+              initial="initial"
+              whileInView="animate"
+              viewport={{ once: true }}
+            >
+              {featuredPets.map((pet) => (
+                <motion.div
+                  key={pet.id}
+                  variants={scaleIn}
+                  whileHover={{ scale: 1.05 }}
+                  className="group cursor-pointer"
+                >
+                  <Link to={`/adoptar?pet=${pet.id}`}>
+                    <div className="bg-white rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300">
+                      <div className="aspect-square bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
+                        {pet.main_photo_url ? (
+                          <img 
+                            src={pet.main_photo_url} 
+                            alt={pet.name}
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-7xl">
+                            {pet.species === 'dog' ? '🐕' : pet.species === 'cat' ? '🐈' : '🐾'}
+                          </div>
+                        )}
                       </div>
-                      <button className="p-2 rounded-full hover:bg-pink-50 transition-colors group/heart">
-                        <Heart className="w-5 h-5 text-gray-400 group-hover/heart:text-pink-500 group-hover/heart:fill-pink-500 transition-colors" />
-                      </button>
+                      <div className="p-4">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h3 className="font-bold text-lg">{pet.name}</h3>
+                            <p className="text-muted-foreground text-sm">
+                              {pet.species === 'dog' ? 'Perrito' : pet.species === 'cat' ? 'Gatito' : 'Mascota'} 
+                              {pet.age_approx ? ` • ${pet.age_approx}` : ''}
+                            </p>
+                          </div>
+                          <button 
+                            className="p-2 rounded-full hover:bg-pink-50 transition-colors group/heart"
+                            onClick={(e) => e.preventDefault()}
+                          >
+                            <Heart className="w-5 h-5 text-gray-400 group-hover/heart:text-pink-500 group-hover/heart:fill-pink-500 transition-colors" />
+                          </button>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </motion.div>
+                  </Link>
+                </motion.div>
+              ))}
+            </motion.div>
+          )}
 
           <motion.div 
             className="text-center mt-12"

@@ -111,6 +111,8 @@ export default {
         sans: ["Nunito", "Quicksand", "Poppins", "system-ui", "sans-serif"],
         // Alternativa display para títulos
         display: ["Fredoka", "Nunito", "sans-serif"],
+        // Fuente manuscrita para etiquetas de fotos
+        handwriting: ["Caveat", "cursive"],
       },
       borderRadius: {
         // Bordes generosos para sensación "blanda" y tierna

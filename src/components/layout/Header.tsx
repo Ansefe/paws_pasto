@@ -10,6 +10,8 @@ import {
 } from "@/components/ui/sheet"
 import { motion } from "framer-motion"
 import { useState, useEffect } from "react"
+import { LoginModal } from "@/components/auth/LoginModal"
+import { ApplicationModal } from "@/components/auth/ApplicationModal"
 
 const navLinks = [
   { to: "/", label: "Inicio" },
@@ -23,6 +25,8 @@ export function Header() {
   const location = useLocation()
   const isHome = location.pathname === "/"
   const [scrolled, setScrolled] = useState(false)
+  const [showLoginModal, setShowLoginModal] = useState(false)
+  const [showApplicationModal, setShowApplicationModal] = useState(false)
 
   useEffect(() => {
     const handleScroll = () => {
@@ -53,32 +57,43 @@ export function Header() {
             whileHover={{ rotate: [0, -10, 10, 0] }}
             transition={{ duration: 0.5 }}
           >
-            <div className="w-10 h-10 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-cyan-300/50 transition-shadow">
+            <div className={`w-10 h-10 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-xl flex items-center justify-center transition-shadow ${
+              isTransparent ? "shadow-[0_4px_12px_rgba(0,0,0,0.3)] group-hover:shadow-cyan-300/50" : "shadow-lg group-hover:shadow-cyan-300/50"
+            }`}>
               <PawPrint className="w-6 h-6 text-white" />
             </div>
           </motion.div>
           <span className={`text-xl font-bold transition-colors ${
-            isTransparent ? "text-white" : "text-gray-800"
+            isTransparent 
+              ? "text-white [text-shadow:_0_1px_3px_rgb(0_0_0_/_60%),_0_2px_8px_rgb(0_0_0_/_40%)]" 
+              : "text-gray-800"
           }`}>
-            Paws<span className={isTransparent ? "text-brand-yellow" : "text-brand-sky"}>.</span>
+            Paws<span className={isTransparent ? "text-brand-yellow [text-shadow:_0_1px_3px_rgb(0_0_0_/_50%)]" : "text-brand-sky"}>.</span>
           </span>
         </Link>
 
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-1">
-          {navLinks.map((link) => (
-            <Link 
-              key={link.to}
-              to={link.to} 
-              className={`relative px-4 py-2 text-sm font-medium transition-colors rounded-full ${
-                isTransparent 
-                  ? "text-white/90 hover:text-white hover:bg-white/10" 
-                  : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
-              }`}
-            >
-              {link.label}
-            </Link>
-          ))}
+        <nav className="hidden md:flex items-center gap-4">
+          {/* Contenedor con efecto cristal solo cuando es transparente */}
+          <div className={`flex items-center gap-1 px-2 py-1.5 rounded-2xl transition-all duration-300 ${
+            isTransparent 
+              ? "bg-black/20 backdrop-blur-md border border-white/10 shadow-lg" 
+              : ""
+          }`}>
+            {navLinks.map((link) => (
+              <Link 
+                key={link.to}
+                to={link.to} 
+                className={`relative px-4 py-2 text-sm font-medium transition-colors rounded-xl ${
+                  isTransparent 
+                    ? "text-white hover:text-white hover:bg-white/20" 
+                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                }`}
+              >
+                {link.label}
+              </Link>
+            ))}
+          </div>
           
           <div className="ml-4 flex items-center gap-2">
             <Button 
@@ -86,13 +101,14 @@ export function Header() {
               size="icon"
               className={`rounded-full ${
                 isTransparent 
-                  ? "text-white hover:bg-white/10" 
+                  ? "text-white hover:bg-white/20 [filter:_drop-shadow(0_1px_2px_rgb(0_0_0_/_50%))]" 
                   : "text-gray-600 hover:bg-gray-100"
               }`}
             >
               <Heart className="h-5 w-5" />
             </Button>
             <Button 
+              onClick={() => setShowLoginModal(true)}
               className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-medium px-6 rounded-full shadow-lg shadow-cyan-500/25 hover:shadow-xl hover:shadow-cyan-500/30 transition-all"
             >
               Iniciar Sesión
@@ -141,6 +157,7 @@ export function Header() {
                 Mis Favoritos
               </Button>
               <Button 
+                onClick={() => setShowLoginModal(true)}
                 className="mt-4 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-medium rounded-xl h-12"
               >
                 Iniciar Sesión
@@ -149,6 +166,24 @@ export function Header() {
           </SheetContent>
         </Sheet>
       </div>
+
+      {/* Modales de autenticación */}
+      <LoginModal 
+        isOpen={showLoginModal} 
+        onClose={() => setShowLoginModal(false)}
+        onSwitchToApplication={() => {
+          setShowLoginModal(false)
+          setShowApplicationModal(true)
+        }}
+      />
+      <ApplicationModal 
+        isOpen={showApplicationModal} 
+        onClose={() => setShowApplicationModal(false)}
+        onSwitchToLogin={() => {
+          setShowApplicationModal(false)
+          setShowLoginModal(true)
+        }}
+      />
     </motion.header>
   )
 }
