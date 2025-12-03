@@ -93,9 +93,28 @@ const { data, error } = await supabase
 
 ---
 
-## Autenticación (TODO)
+## Autenticación
 
-### Registro
+La autenticación está implementada en `src/contexts/AuthContext.tsx`.
+
+### Login (Implementado)
+
+```typescript
+// Uso via AuthContext
+const { signIn } = useAuth()
+
+const { error, profile } = await signIn(email, password)
+if (error) {
+  console.error(error.message)
+} else {
+  console.log('Logged in as:', profile?.role)
+}
+```
+
+### Registro (Solo Admin)
+
+Los usuarios no se registran directamente. Las fundaciones se postulan vía formulario 
+y el admin crea sus cuentas manualmente.
 
 ```typescript
 const { data, error } = await supabase.auth.signUp({
@@ -106,15 +125,6 @@ const { data, error } = await supabase.auth.signUp({
       full_name: 'Nombre Completo',
     }
   }
-})
-```
-
-### Login
-
-```typescript
-const { data, error } = await supabase.auth.signInWithPassword({
-  email: 'usuario@email.com',
-  password: 'password123'
 })
 ```
 
@@ -400,4 +410,49 @@ https://[PROJECT_ID].supabase.co
 
 ```
 https://[PROJECT_ID].supabase.co/storage/v1/object/public/images/pets/foto.jpg
+```
+
+---
+
+## Servicios Externos
+
+### Telegram Bot (Notificaciones)
+
+**Archivo**: `src/services/telegram.ts`
+
+Servicio para enviar notificaciones de postulaciones de fundaciones a un grupo de Telegram.
+
+```typescript
+interface TelegramService {
+  sendMessage: (message: string) => Promise<{ success: boolean; error?: string }>
+  sendApplicationNotification: (data: ApplicationData) => Promise<{ success: boolean; error?: string }>
+}
+```
+
+**Configuración**:
+```env
+VITE_TELEGRAM_BOT_TOKEN=123456:ABC-DEF...
+VITE_TELEGRAM_CHAT_ID=-100123456789
+```
+
+**Uso**:
+```typescript
+import { telegramService } from '@/services/telegram'
+
+const result = await telegramService.sendApplicationNotification({
+  foundationName: 'Patitas Felices',
+  responsibleName: 'Juan Pérez',
+  email: 'juan@email.com',
+  phone: '+57 300 123 4567',
+  socialLinks: '@patitasfelices',
+  experience: 'Descripción de la experiencia...'
+})
+```
+
+### Web3Forms (Fallback Email)
+
+Si Telegram no está configurado, el sistema usa Web3Forms como fallback para enviar emails.
+
+```env
+VITE_WEB3FORMS_KEY=tu-access-key
 ```

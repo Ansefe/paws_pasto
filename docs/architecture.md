@@ -50,23 +50,36 @@ paws-pasto-adopciones/
 │
 ├── src/
 │   ├── components/          # Componentes React
+│   │   ├── auth/            # LoginModal, ApplicationModal, ProtectedRoute
 │   │   ├── layout/          # Header, Footer, Sidebar
 │   │   ├── ui/              # Componentes shadcn/ui
 │   │   └── *.tsx            # Componentes de feature
 │   │
+│   ├── contexts/            # React Contexts
+│   │   ├── AuthContext.tsx  # Autenticación y sesión
+│   │   └── SiteConfigContext.tsx # Configuración del sitio
+│   │
 │   ├── hooks/               # Custom React hooks
 │   │   ├── usePets.ts       # Fetching de mascotas
-│   │   └── useFoundations.ts # Fetching de fundaciones
+│   │   ├── useFoundations.ts # Fetching de fundaciones
+│   │   └── useSiteConfig.ts # Configuración del sitio
 │   │
 │   ├── lib/                 # Utilidades y configuración
 │   │   ├── supabase.ts      # Cliente de Supabase
 │   │   └── utils.ts         # Funciones de utilidad
 │   │
+│   ├── services/            # Servicios externos
+│   │   └── telegram.ts      # Notificaciones vía Telegram Bot
+│   │
 │   ├── pages/               # Páginas/vistas principales
 │   │   ├── Home.tsx
 │   │   ├── Adopt.tsx
 │   │   ├── Foundations.tsx
-│   │   └── About.tsx
+│   │   ├── About.tsx
+│   │   ├── Donate.tsx
+│   │   └── admin/           # Panel de administración
+│   │       ├── AdminDashboard.tsx
+│   │       └── sections/    # Secciones del admin
 │   │
 │   ├── types/               # Definiciones de TypeScript
 │   │   └── database.types.ts # Tipos de Supabase
@@ -76,9 +89,12 @@ paws-pasto-adopciones/
 │   └── index.css            # Estilos globales + Tailwind
 │
 ├── supabase/                # Configuración de Supabase
+│   ├── migrations/          # Migraciones SQL
+│   │   ├── 001_initial.sql
+│   │   ├── 002_rls.sql
+│   │   └── 003_site_settings.sql
 │   ├── schema.sql           # DDL de la base de datos
-│   ├── seed.sql             # Datos de prueba
-│   └── fix_auth_trigger.sql # Scripts de corrección
+│   └── seed.sql             # Datos de prueba
 │
 ├── .env.example             # Template de variables de entorno
 ├── tailwind.config.js       # Configuración de Tailwind

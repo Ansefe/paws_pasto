@@ -57,8 +57,16 @@ npm run dev
 ### Variables de Entorno
 
 ```env
+# Supabase
 VITE_SUPABASE_URL=https://tu-proyecto.supabase.co
 VITE_SUPABASE_ANON_KEY=tu-anon-key
+
+# Telegram Bot (para notificaciones de postulaciones)
+VITE_TELEGRAM_BOT_TOKEN=tu-bot-token
+VITE_TELEGRAM_CHAT_ID=tu-chat-id
+
+# Web3Forms (fallback para emails)
+VITE_WEB3FORMS_KEY=tu-web3forms-key
 ```
 
 ---
@@ -130,7 +138,8 @@ adoptions (solicitudes)
 2. **Adoptar** (`/adoptar`) - Catálogo de mascotas con filtros
 3. **Fundaciones** (`/fundaciones`) - Directorio de fundaciones verificadas
 4. **Nosotros** (`/nosotros`) - About con navegación vertical
-5. **Donar** (`/donar`) - Información para donaciones (TODO)
+5. **Donar** (`/donar`) - Página con métodos de donación
+6. **Admin** (`/admin`) - Panel de administración (protegido)
 
 ---
 
@@ -163,4 +172,4 @@ Para contribuir al proyecto:
 
 ---
 
-**Última actualización:** Noviembre 2024
+**Última actualización:** Diciembre 2024

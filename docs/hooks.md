@@ -262,20 +262,76 @@ if (loading) {
 
 ---
 
-## Futuros Hooks (TODO)
+## useAuth (Implementado)
 
-### useAuth
+**Archivo**: `src/contexts/AuthContext.tsx`
+
+Hook para autenticación y gestión de sesión.
+
 ```typescript
-function useAuth() {
-  return {
-    user: User | null
-    loading: boolean
-    signIn: (email, password) => Promise<void>
-    signUp: (email, password, metadata) => Promise<void>
-    signOut: () => Promise<void>
-  }
+interface UseAuthReturn {
+  user: User | null
+  profile: Profile | null
+  session: Session | null
+  isLoading: boolean
+  isAdmin: boolean
+  isFoundation: boolean
+  signIn: (email: string, password: string) => Promise<{ error: Error | null; profile: Profile | null }>
+  signUp: (email: string, password: string, fullName: string) => Promise<{ error: Error | null }>
+  signOut: () => Promise<void>
+  updateProfile: (updates: Partial<Profile>) => Promise<{ error: Error | null }>
+}
+
+function useAuth(): UseAuthReturn
+```
+
+**Ejemplo**:
+```tsx
+const { user, isAdmin, signIn, signOut } = useAuth()
+
+// Login
+const { error, profile } = await signIn(email, password)
+
+// Verificar rol
+if (isAdmin) {
+  navigate('/admin')
 }
 ```
+
+---
+
+## useSiteConfig (Implementado)
+
+**Archivo**: `src/hooks/useSiteConfig.ts`
+
+Hook para gestionar la configuración del sitio desde Supabase.
+
+```typescript
+interface UseSiteConfigReturn {
+  config: SiteConfig
+  loading: boolean
+  error: string | null
+  updateConfig: (key: string, value: string) => Promise<void>
+  refreshConfig: () => Promise<void>
+}
+
+function useSiteConfig(): UseSiteConfigReturn
+```
+
+**Ejemplo**:
+```tsx
+const { config, updateConfig } = useSiteConfig()
+
+// Leer configuración
+console.log(config.site_name)
+
+// Actualizar (solo admin)
+await updateConfig('contact_email', 'nuevo@email.com')
+```
+
+---
+
+## Futuros Hooks (TODO)
 
 ### useFavorites
 ```typescript

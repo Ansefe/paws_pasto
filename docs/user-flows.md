@@ -273,3 +273,95 @@ Las descripciones de mascotas usan primera persona:
 - "Soy muy juguetona y me encanta..."
 - "Busco una familia que..."
 - "Mi corazón tiene espacio para ti"
+
+---
+
+## Flujo 6: Login y Acceso Admin (Implementado)
+
+```
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│  Click      │────▶│   Login     │────▶│  Verificar  │
+│  "Ingresar" │     │   Modal     │     │   Perfil    │
+└─────────────┘     └─────────────┘     └──────┬──────┘
+                                               │
+                    ┌──────────────────────────┼──────────────────────────┐
+                    ▼                          ▼                          ▼
+              ┌───────────┐            ┌───────────────┐          ┌───────────────┐
+              │  No existe│            │ role: admin   │          │ role: adopter │
+              │  perfil   │            │               │          │               │
+              └─────┬─────┘            └───────┬───────┘          └───────┬───────┘
+                    │                          │                          │
+                    ▼                          ▼                          ▼
+              Error: "No          Redirigir a          Cerrar modal
+              autorizado"            /admin             y continuar
+```
+
+### Componentes Involucrados
+
+1. **LoginModal** (`src/components/auth/LoginModal.tsx`)
+   - Formulario de email/password
+   - Usa `createPortal` para renderizar sobre todo
+   - Bloquea scroll del body
+   - Opción de cambiar a postulación
+
+2. **AuthContext** (`src/contexts/AuthContext.tsx`)
+   - Maneja estado de sesión y perfil
+   - Provee `signIn`, `signOut`, `isAdmin`, `isFoundation`
+   - Carga perfil en background
+
+3. **ProtectedRoute** (`src/components/auth/ProtectedRoute.tsx`)
+   - Envuelve rutas que requieren autenticación
+   - Verifica `isLoading` → muestra loading
+   - Verifica `user` → redirige si no hay
+   - Verifica `isAdmin` → muestra "No autorizado"
+
+### Estados del Login
+
+| Estado | UI | Acción |
+|--------|-----|--------|
+| Loading | Spinner en botón | Esperar |
+| Error credenciales | Mensaje rojo | Corregir datos |
+| Error sin perfil | "No autorizado" | Contactar admin |
+| Éxito (admin) | "Redirigiendo..." | Ir a /admin |
+| Éxito (adopter) | "Bienvenido" | Cerrar modal |
+
+---
+
+## Flujo 7: Postulación de Fundación (Implementado)
+
+```
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│  Click      │────▶│ Application │────▶│  Enviar vía │
+│"Postularse" │     │   Modal     │     │  Telegram   │
+└─────────────┘     └─────────────┘     └──────┬──────┘
+                                               │
+                         ┌─────────────────────┴─────────────────────┐
+                         ▼                                           ▼
+                   ┌───────────┐                              ┌───────────┐
+                   │  Success  │                              │  Fallback │
+                   │  Telegram │                              │ Web3Forms │
+                   └───────────┘                              └───────────┘
+```
+
+### Datos del Formulario
+- Nombre de la fundación/rescatista
+- Nombre del responsable
+- Email
+- Teléfono
+- Redes sociales
+- Experiencia en rescate
+
+### Notificación a Admin
+El admin recibe notificación en Telegram con formato:
+```
+🐾 Nueva Postulación de Fundación
+
+📋 Fundación: Patitas Felices
+👤 Responsable: Juan Pérez
+📧 Email: juan@email.com
+📱 Teléfono: +57 300 123 4567
+🔗 Redes: @patitasfelices
+
+📝 Experiencia:
+[Descripción de la experiencia...]
+```

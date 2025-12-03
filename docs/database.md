@@ -326,10 +326,34 @@ GROUP BY f.id;
 
 ---
 
+### site_settings
+Configuración dinámica del sitio (editable desde el panel admin).
+
+| Columna | Tipo | Nullable | Default | Descripción |
+|---------|------|----------|---------|-------------|
+| id | UUID | No | gen_random_uuid() | PK |
+| key | VARCHAR(100) | No | - | Clave única de configuración |
+| value | JSONB | Sí | - | Valor en formato JSON |
+| created_at | TIMESTAMPTZ | No | NOW() | Fecha de creación |
+| updated_at | TIMESTAMPTZ | No | NOW() | Última actualización |
+
+**Claves de configuración**:
+- `site_name` - Nombre del sitio
+- `site_description` - Descripción
+- `contact_email` - Email de contacto
+- `contact_phone` - Teléfono
+- `contact_address` - Dirección
+- `social_instagram` - URL de Instagram
+- `social_facebook` - URL de Facebook
+
+---
+
 ## Archivos SQL
 
 | Archivo | Propósito |
 |---------|-----------|
-| `supabase/schema.sql` | DDL completo (tablas, enums, triggers, RLS) |
+| `supabase/migrations/001_initial.sql` | Schema inicial |
+| `supabase/migrations/002_rls.sql` | Políticas RLS |
+| `supabase/migrations/003_site_settings.sql` | Tabla de configuración |
+| `supabase/schema.sql` | DDL completo (legacy) |
 | `supabase/seed.sql` | Datos de prueba |
-| `supabase/fix_auth_trigger.sql` | Corrección para trigger de auth |
