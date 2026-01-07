@@ -1,9 +1,9 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { 
-  Search, MoreVertical, Mail, Phone,
+  Search, MoreVertical, Phone,
   Shield, User, Building2, Trash2, Edit2, Eye,
-  ChevronLeft, ChevronRight
+  ChevronLeft, ChevronRight, Loader2, AlertTriangle
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -13,50 +13,20 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 
-// Datos de ejemplo
-const mockUsers = [
-  { 
-    id: "1", 
-    name: "María García", 
-    email: "maria@email.com", 
-    phone: "300 123 4567",
-    role: "adopter", 
-    status: "active",
-    createdAt: "2024-01-15",
-    avatar: null
-  },
-  { 
-    id: "2", 
-    name: "Fundación Patitas", 
-    email: "patitas@email.com", 
-    phone: "301 234 5678",
-    role: "foundation", 
-    status: "active",
-    createdAt: "2024-01-10",
-    avatar: null
-  },
-  { 
-    id: "3", 
-    name: "Carlos Ruiz", 
-    email: "carlos@email.com", 
-    phone: "302 345 6789",
-    role: "adopter", 
-    status: "active",
-    createdAt: "2024-02-01",
-    avatar: null
-  },
-  { 
-    id: "4", 
-    name: "Rescatista Ana", 
-    email: "ana.rescate@email.com", 
-    phone: "303 456 7890",
-    role: "foundation", 
-    status: "pending",
-    createdAt: "2024-02-10",
-    avatar: null
-  },
-]
+import { AddUserModal } from "@/components/admin/AddUserModal"
+import { EditUserModal } from "@/components/admin/EditUserModal"
+import { UserDetailsModal } from "@/components/admin/UserDetailsModal"
+import { supabase } from "@/lib/supabase"
+import type { Profile } from "@/types/database.types"
 
 const roleLabels: Record<string, { label: string; color: string; icon: typeof User }> = {
   admin: { label: "Administrador", color: "bg-purple-100 text-purple-700", icon: Shield },
@@ -64,22 +34,100 @@ const roleLabels: Record<string, { label: string; color: string; icon: typeof Us
   adopter: { label: "Adoptante", color: "bg-green-100 text-green-700", icon: User },
 }
 
-const statusLabels: Record<string, { label: string; color: string }> = {
-  active: { label: "Activo", color: "bg-emerald-100 text-emerald-700" },
-  pending: { label: "Pendiente", color: "bg-amber-100 text-amber-700" },
-  inactive: { label: "Inactivo", color: "bg-gray-100 text-gray-700" },
-}
-
 export function AdminUsers() {
   const [searchTerm, setSearchTerm] = useState("")
   const [roleFilter, setRoleFilter] = useState<string>("all")
+  
+  // Modals state
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false)
+  const [userToEdit, setUserToEdit] = useState<Profile | null>(null)
+  const [userToView, setUserToView] = useState<Profile | null>(null)
+  const [userToDelete, setUserToDelete] = useState<Profile | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
 
-  const filteredUsers = mockUsers.filter(user => {
-    const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          user.email.toLowerCase().includes(searchTerm.toLowerCase())
+  const [users, setUsers] = useState<Profile[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  // Fetch users from Supabase
+  const fetchUsers = async () => {
+    try {
+      setIsLoading(true)
+      setError(null)
+      
+      const { data, error: fetchError } = await supabase
+        .from('profiles')
+        .select('*')
+        .order('created_at', { ascending: false })
+
+      if (fetchError) throw fetchError
+      
+      setUsers(data || [])
+    } catch (err) {
+      console.error("Error fetching users:", err)
+      setError(err instanceof Error ? err.message : "Error al cargar usuarios")
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchUsers()
+  }, [])
+
+  const filteredUsers = users.filter(user => {
+    const matchesSearch = user.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          user.id.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesRole = roleFilter === "all" || user.role === roleFilter
     return matchesSearch && matchesRole
   })
+
+  const handleUserCreated = () => {
+    fetchUsers() 
+  }
+
+  const handleUserUpdated = () => {
+    fetchUsers()
+    setUserToEdit(null)
+  }
+
+  const handleDeleteUser = async () => {
+    if (!userToDelete) return
+
+    setIsDeleting(true)
+    try {
+      // Usamos la función RPC para eliminar de auth y profiles al mismo tiempo
+      const { error } = await supabase.rpc('delete_user_complete', {
+        target_user_id: userToDelete.id
+      })
+
+      if (error) {
+        console.error("Error RPC:", error)
+        // Fallback: Si la RPC no existe o falla, intentamos borrar solo perfil
+        // Esto es útil si el usuario no ha ejecutado el script SQL aún
+        console.log("Intentando borrado manual de perfil...")
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .delete()
+          .eq('id', userToDelete.id)
+        
+        if (profileError) throw profileError
+      }
+
+      // Actualizamos la lista localmente
+      setUsers(users.filter(u => u.id !== userToDelete.id))
+      setUserToDelete(null)
+      
+      // Mostrar éxito (opcional, podrías usar un toast aquí)
+      alert("Usuario eliminado correctamente")
+      
+    } catch (err) {
+      console.error("Error deleting user:", err)
+      alert("No se pudo eliminar el usuario completamente. Asegúrate de haber ejecutado el script 'rpc_delete_user.sql' en Supabase.")
+    } finally {
+      setIsDeleting(false)
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -89,7 +137,10 @@ export function AdminUsers() {
           <h1 className="text-2xl font-bold text-gray-800">Usuarios</h1>
           <p className="text-gray-500">Gestiona todos los usuarios de la plataforma</p>
         </div>
-        <Button className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white rounded-xl">
+        <Button 
+          onClick={() => setIsAddModalOpen(true)}
+          className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white rounded-xl"
+        >
           + Agregar Usuario
         </Button>
       </div>
@@ -119,65 +170,91 @@ export function AdminUsers() {
         </div>
       </div>
 
+      {/* Loading State */}
+      {isLoading && (
+        <div className="flex items-center justify-center py-16">
+          <Loader2 className="w-8 h-8 text-cyan-500 animate-spin" />
+        </div>
+      )}
+
+      {/* Error State */}
+      {error && !isLoading && (
+        <div className="bg-red-50 border border-red-200 rounded-2xl p-6 text-center">
+          <p className="text-red-600">{error}</p>
+          <Button 
+            onClick={fetchUsers}
+            variant="outline"
+            className="mt-4 rounded-xl"
+          >
+            Reintentar
+          </Button>
+        </div>
+      )}
+
       {/* Users Table */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden"
-      >
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-100">
-              <tr>
-                <th className="text-left px-6 py-4 text-sm font-semibold text-gray-600">Usuario</th>
-                <th className="text-left px-6 py-4 text-sm font-semibold text-gray-600">Contacto</th>
-                <th className="text-left px-6 py-4 text-sm font-semibold text-gray-600">Rol</th>
-                <th className="text-left px-6 py-4 text-sm font-semibold text-gray-600">Estado</th>
-                <th className="text-left px-6 py-4 text-sm font-semibold text-gray-600">Registro</th>
-                <th className="text-right px-6 py-4 text-sm font-semibold text-gray-600">Acciones</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {filteredUsers.map((user) => {
-                const roleInfo = roleLabels[user.role]
-                const statusInfo = statusLabels[user.status]
-                return (
-                  <tr key={user.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-full flex items-center justify-center text-white font-semibold">
-                          {user.name.charAt(0)}
+      {!isLoading && !error && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden"
+        >
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50 border-b border-gray-100">
+                <tr>
+                  <th className="text-left px-6 py-4 text-sm font-semibold text-gray-600">Usuario</th>
+                  <th className="text-left px-6 py-4 text-sm font-semibold text-gray-600">Contacto</th>
+                  <th className="text-left px-6 py-4 text-sm font-semibold text-gray-600">Rol</th>
+                  <th className="text-left px-6 py-4 text-sm font-semibold text-gray-600">Registro</th>
+                  <th className="text-right px-6 py-4 text-sm font-semibold text-gray-600">Acciones</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {filteredUsers.map((user) => {
+                  const roleInfo = roleLabels[user.role] || {
+                    label: user.role || "Desconocido",
+                    color: "bg-gray-100 text-gray-600",
+                    icon: User
+                  }
+                  
+                  return (
+                    <tr key={user.id} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-full flex items-center justify-center text-white font-semibold shrink-0">
+                            {user.full_name?.charAt(0) || (user.id ? user.id.charAt(0).toUpperCase() : "?")}
+                          </div>
+                          <div className="flex flex-col">
+                            <p className="font-medium text-gray-800">{user.full_name || "Sin nombre"}</p>
+                            <code className="text-[10px] text-gray-400 bg-gray-50 px-1 py-0.5 rounded w-fit">
+                              {user.id.substring(0, 8)}...
+                            </code>
+                          </div>
                         </div>
-                        <div>
-                          <p className="font-medium text-gray-800">{user.name}</p>
-                          <p className="text-sm text-gray-500">{user.email}</p>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex flex-col gap-1">
+                          {user.phone ? (
+                            <span className="text-sm text-gray-600 flex items-center gap-2">
+                              <Phone className="w-3 h-3 text-cyan-500" /> 
+                              {user.phone}
+                            </span>
+                          ) : (
+                            <span className="text-xs text-gray-400 italic flex items-center gap-2">
+                              <Phone className="w-3 h-3" /> Sin teléfono
+                            </span>
+                          )}
                         </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex flex-col gap-1">
-                        <span className="text-sm text-gray-600 flex items-center gap-1">
-                          <Mail className="w-3 h-3" /> {user.email}
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${roleInfo.color}`}>
+                          <roleInfo.icon className="w-3.5 h-3.5" />
+                          {roleInfo.label}
                         </span>
-                        <span className="text-sm text-gray-600 flex items-center gap-1">
-                          <Phone className="w-3 h-3" /> {user.phone}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${roleInfo.color}`}>
-                        <roleInfo.icon className="w-3 h-3" />
-                        {roleInfo.label}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={`inline-block px-2.5 py-1 rounded-full text-xs font-medium ${statusInfo.color}`}>
-                        {statusInfo.label}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-500">
-                      {new Date(user.createdAt).toLocaleDateString('es-CO')}
-                    </td>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-500">
+                        {new Date(user.created_at).toLocaleDateString('es-CO')}
+                      </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center justify-end">
                         <DropdownMenu>
@@ -187,13 +264,22 @@ export function AdminUsers() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="w-48">
-                            <DropdownMenuItem className="gap-2">
+                            <DropdownMenuItem 
+                              className="gap-2 cursor-pointer"
+                              onClick={() => setUserToView(user)}
+                            >
                               <Eye className="w-4 h-4" /> Ver detalles
                             </DropdownMenuItem>
-                            <DropdownMenuItem className="gap-2">
+                            <DropdownMenuItem 
+                              className="gap-2 cursor-pointer"
+                              onClick={() => setUserToEdit(user)}
+                            >
                               <Edit2 className="w-4 h-4" /> Editar
                             </DropdownMenuItem>
-                            <DropdownMenuItem className="gap-2 text-red-600">
+                            <DropdownMenuItem 
+                              className="gap-2 text-red-600 cursor-pointer"
+                              onClick={() => setUserToDelete(user)}
+                            >
                               <Trash2 className="w-4 h-4" /> Eliminar
                             </DropdownMenuItem>
                           </DropdownMenuContent>
@@ -203,28 +289,103 @@ export function AdminUsers() {
                   </tr>
                 )
               })}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Pagination */}
-        <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100">
-          <p className="text-sm text-gray-500">
-            Mostrando {filteredUsers.length} de {mockUsers.length} usuarios
-          </p>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="icon" className="rounded-lg" disabled>
-              <ChevronLeft className="w-4 h-4" />
-            </Button>
-            <Button variant="outline" size="sm" className="rounded-lg bg-cyan-50 border-cyan-200 text-cyan-700">
-              1
-            </Button>
-            <Button variant="outline" size="icon" className="rounded-lg" disabled>
-              <ChevronRight className="w-4 h-4" />
-            </Button>
+              </tbody>
+            </table>
           </div>
-        </div>
-      </motion.div>
+
+          {/* Empty State */}
+          {filteredUsers.length === 0 && (
+            <div className="text-center py-12">
+              <User className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+              <p className="text-gray-500">No se encontraron usuarios</p>
+            </div>
+          )}
+
+          {/* Pagination */}
+          {filteredUsers.length > 0 && (
+            <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100">
+              <p className="text-sm text-gray-500">
+                Mostrando {filteredUsers.length} de {users.length} usuarios
+              </p>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="icon" className="rounded-lg" disabled>
+                  <ChevronLeft className="w-4 h-4" />
+                </Button>
+                <Button variant="outline" size="sm" className="rounded-lg bg-cyan-50 border-cyan-200 text-cyan-700">
+                  1
+                </Button>
+                <Button variant="outline" size="icon" className="rounded-lg" disabled>
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+          )}
+        </motion.div>
+      )}
+
+      {/* Add User Modal */}
+      <AddUserModal 
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onUserCreated={handleUserCreated}
+      />
+
+      {/* Edit User Modal */}
+      <EditUserModal
+        user={userToEdit}
+        isOpen={!!userToEdit}
+        onClose={() => setUserToEdit(null)}
+        onUserUpdated={handleUserUpdated}
+      />
+
+      {/* View User Modal */}
+      <UserDetailsModal
+        user={userToView}
+        isOpen={!!userToView}
+        onClose={() => setUserToView(null)}
+      />
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={!!userToDelete} onOpenChange={(open) => !open && setUserToDelete(null)}>
+        <DialogContent className="sm:max-w-md rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <AlertTriangle className="w-5 h-5" />
+              Eliminar Usuario
+            </DialogTitle>
+            <DialogDescription>
+              ¿Estás seguro que deseas eliminar a <strong>{userToDelete?.full_name}</strong>?
+              <br /><br />
+              Esta acción eliminará su perfil y podría afectar datos relacionados. Esta acción no se puede deshacer.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button
+              variant="outline"
+              onClick={() => setUserToDelete(null)}
+              disabled={isDeleting}
+              className="rounded-xl"
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDeleteUser}
+              disabled={isDeleting}
+              className="rounded-xl bg-red-600 hover:bg-red-700"
+            >
+              {isDeleting ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Eliminando...
+                </>
+              ) : (
+                "Eliminar Usuario"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
