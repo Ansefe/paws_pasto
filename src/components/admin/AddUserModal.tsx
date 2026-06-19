@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { supabase } from "@/lib/supabase"
+import { supabase, createIsolatedClient } from "@/lib/supabase"
 import type { UserRole } from "@/types/database.types"
 
 interface AddUserModalProps {
@@ -46,8 +46,11 @@ export function AddUserModal({ isOpen, onClose, onUserCreated }: AddUserModalPro
         throw new Error(`Rol inválido seleccionado: ${formData.role}`)
       }
 
-      // 1. Crear usuario en Auth con metadata que incluye el teléfono
-      const { data: authData, error: authError } = await supabase.auth.signUp({
+      // 1. Crear usuario en Auth con metadata que incluye el teléfono.
+      // IMPORTANTE: usamos un cliente AISLADO para que el signUp no reemplace
+      // la sesión del administrador por la del usuario recién creado.
+      const authClient = createIsolatedClient()
+      const { data: authData, error: authError } = await authClient.auth.signUp({
         email: formData.email,
         password: formData.password,
         options: {

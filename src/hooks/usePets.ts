@@ -1,11 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
-import type { PetWithFoundation, PetSpecies, PetSize, PetGender, PetStatus, Foundation } from '@/types/database.types'
-
-// Tipo para la respuesta de Supabase con join
-type PetQueryResult = PetWithFoundation & {
-  foundation: Pick<Foundation, 'id' | 'foundation_name' | 'location_city' | 'whatsapp_number'>
-}
+import type { PetWithFoundation, PetSpecies, PetSize, PetGender, PetStatus } from '@/types/database.types'
 
 export interface PetFilters {
   species?: PetSpecies | 'all'
@@ -84,13 +79,7 @@ export function usePets(filters?: PetFilters): UsePetsReturn {
 
       if (queryError) throw queryError
 
-      // Transformar los datos al tipo esperado
-      const petsWithFoundation: PetWithFoundation[] = (data || []).map((pet: any) => ({
-        ...pet,
-        foundation: pet.foundation
-      }))
-
-      setPets(petsWithFoundation)
+      setPets((data ?? []) as PetWithFoundation[])
     } catch (err) {
       console.error('Error fetching pets:', err)
       setError(err instanceof Error ? err.message : 'Error al cargar las mascotas')
@@ -185,12 +174,7 @@ export function useFeaturedPets(limit: number = 6): UsePetsReturn {
 
       if (queryError) throw queryError
 
-      const petsWithFoundation: PetWithFoundation[] = (data || []).map((pet: any) => ({
-        ...pet,
-        foundation: pet.foundation
-      }))
-
-      setPets(petsWithFoundation)
+      setPets((data ?? []) as PetWithFoundation[])
     } catch (err) {
       console.error('Error fetching featured pets:', err)
       setError(err instanceof Error ? err.message : 'Error al cargar las mascotas destacadas')

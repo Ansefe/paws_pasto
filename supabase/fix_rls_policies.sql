@@ -38,3 +38,4 @@ BEGIN
   RAISE NOTICE '✅ Políticas RLS actualizadas: Ahora los admins pueden editar y eliminar perfiles';
 END $$;
 
+

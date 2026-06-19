@@ -1,11 +1,12 @@
 import { useState } from "react"
+import { useNavigate } from "react-router-dom"
 import { motion } from "framer-motion"
-import { 
+import {
   LayoutDashboard, Users, Building2, PawPrint, Settings,
-  ChevronRight, LogOut, Bell, Search, Menu, X
+  ChevronRight, LogOut, Menu, X
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { useAuth } from "@/contexts/AuthContext"
 
 // Importar las secciones
 import { AdminOverview } from "./sections/AdminOverview"
@@ -28,6 +29,18 @@ export default function AdminDashboard() {
   const [activeSection, setActiveSection] = useState<AdminSection>("overview")
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
+
+  const { profile, user, signOut } = useAuth()
+  const navigate = useNavigate()
+
+  const handleLogout = async () => {
+    await signOut()
+    navigate("/")
+  }
+
+  const adminName = profile?.full_name || "Administrador"
+  const adminEmail = user?.email || ""
+  const adminInitial = (profile?.full_name?.charAt(0) || adminEmail.charAt(0) || "A").toUpperCase()
 
   const renderSection = () => {
     switch (activeSection) {
@@ -94,22 +107,33 @@ export default function AdminDashboard() {
         <div className="p-4 border-t border-gray-100">
           <div className={`flex items-center gap-3 ${sidebarOpen ? "" : "justify-center"}`}>
             <div className="w-10 h-10 bg-gradient-to-br from-purple-400 to-pink-500 rounded-full flex items-center justify-center text-white font-bold">
-              A
+              {adminInitial}
             </div>
             {sidebarOpen && (
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-gray-800 truncate">Administrador</p>
-                <p className="text-xs text-gray-500 truncate">admin@paws.com</p>
+                <p className="text-sm font-semibold text-gray-800 truncate">{adminName}</p>
+                <p className="text-xs text-gray-500 truncate">{adminEmail}</p>
               </div>
             )}
           </div>
-          {sidebarOpen && (
-            <Button 
-              variant="ghost" 
+          {sidebarOpen ? (
+            <Button
+              variant="ghost"
+              onClick={handleLogout}
               className="w-full mt-3 text-red-600 hover:text-red-700 hover:bg-red-50 justify-start gap-2"
             >
               <LogOut className="w-4 h-4" />
               Cerrar Sesión
+            </Button>
+          ) : (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleLogout}
+              title="Cerrar Sesión"
+              className="w-full mt-3 text-red-600 hover:text-red-700 hover:bg-red-50"
+            >
+              <LogOut className="w-4 h-4" />
             </Button>
           )}
         </div>
@@ -124,7 +148,7 @@ export default function AdminDashboard() {
       )}
 
       {/* Mobile Sidebar */}
-      <aside className={`lg:hidden fixed inset-y-0 left-0 z-50 w-64 bg-white transform transition-transform duration-300 ${
+      <aside className={`lg:hidden fixed inset-y-0 left-0 z-50 w-64 bg-white flex flex-col transform transition-transform duration-300 ${
         mobileSidebarOpen ? "translate-x-0" : "-translate-x-full"
       }`}>
         <div className="h-16 flex items-center justify-between px-4 border-b border-gray-100">
@@ -138,7 +162,7 @@ export default function AdminDashboard() {
             <X className="w-5 h-5" />
           </Button>
         </div>
-        <nav className="p-4 space-y-2">
+        <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
           {menuItems.map((item) => (
             <button
               key={item.id}
@@ -157,35 +181,44 @@ export default function AdminDashboard() {
             </button>
           ))}
         </nav>
+
+        {/* User & Logout (móvil) */}
+        <div className="p-4 border-t border-gray-100">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-purple-400 to-pink-500 rounded-full flex items-center justify-center text-white font-bold">
+              {adminInitial}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-gray-800 truncate">{adminName}</p>
+              <p className="text-xs text-gray-500 truncate">{adminEmail}</p>
+            </div>
+          </div>
+          <Button
+            variant="ghost"
+            onClick={handleLogout}
+            className="w-full text-red-600 hover:text-red-700 hover:bg-red-50 justify-start gap-2"
+          >
+            <LogOut className="w-4 h-4" />
+            Cerrar Sesión
+          </Button>
+        </div>
       </aside>
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col min-h-screen">
         {/* Top Bar */}
-        <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 lg:px-6">
-          <div className="flex items-center gap-4">
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="lg:hidden"
-              onClick={() => setMobileSidebarOpen(true)}
-            >
-              <Menu className="w-5 h-5" />
-            </Button>
-            <div className="relative hidden sm:block">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <Input 
-                placeholder="Buscar..." 
-                className="pl-10 w-64 rounded-xl border-gray-200"
-              />
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" className="relative rounded-full">
-              <Bell className="w-5 h-5 text-gray-600" />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
-            </Button>
-          </div>
+        <header className="h-16 bg-white border-b border-gray-200 flex items-center gap-4 px-4 lg:px-6">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="lg:hidden"
+            onClick={() => setMobileSidebarOpen(true)}
+          >
+            <Menu className="w-5 h-5" />
+          </Button>
+          <h2 className="font-semibold text-gray-800">
+            {menuItems.find((m) => m.id === activeSection)?.label}
+          </h2>
         </header>
 
         {/* Content */}

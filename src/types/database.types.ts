@@ -48,6 +48,7 @@ export interface Database {
           created_at?: string
           updated_at?: string
         }
+        Relationships: []
       }
       foundations: {
         Row: {
@@ -107,6 +108,15 @@ export interface Database {
           created_at?: string
           updated_at?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: "foundations_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       pets: {
         Row: {
@@ -175,6 +185,15 @@ export interface Database {
           created_at?: string
           updated_at?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: "pets_foundation_id_fkey"
+            columns: ["foundation_id"]
+            isOneToOne: false
+            referencedRelation: "foundations"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       favorites: {
         Row: {
@@ -195,6 +214,22 @@ export interface Database {
           pet_id?: string
           created_at?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: "favorites_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "favorites_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
+            referencedRelation: "pets"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       adoptions: {
         Row: {
@@ -236,6 +271,29 @@ export interface Database {
           updated_at?: string
           resolved_at?: string | null
         }
+        Relationships: [
+          {
+            foreignKeyName: "adoptions_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
+            referencedRelation: "pets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "adoptions_adopter_id_fkey"
+            columns: ["adopter_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "adoptions_foundation_id_fkey"
+            columns: ["foundation_id"]
+            isOneToOne: false
+            referencedRelation: "foundations"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       site_settings: {
         Row: {
@@ -259,6 +317,16 @@ export interface Database {
           created_at?: string
           updated_at?: string
         }
+        Relationships: []
+      }
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      delete_user_complete: {
+        Args: { target_user_id: string }
+        Returns: undefined
       }
     }
     Enums: {
@@ -268,6 +336,9 @@ export interface Database {
       pet_size: PetSize
       pet_status: PetStatus
       adoption_status: AdoptionStatus
+    }
+    CompositeTypes: {
+      [_ in never]: never
     }
   }
 }
