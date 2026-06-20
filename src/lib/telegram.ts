@@ -107,6 +107,37 @@ ${data.references ? `📋 *Referencias:*\n${data.references}` : ''}
   }
 }
 
+export interface AdoptionInterestData {
+  petName: string
+  species: 'dog' | 'cat'
+  breed?: string
+  foundationName: string
+  foundationWhatsapp?: string
+}
+
+/**
+ * Notifica por Telegram cuando alguien muestra interés en adoptar una mascota.
+ */
+export async function sendAdoptionInterestNotification(data: AdoptionInterestData): Promise<boolean> {
+  const speciesLabel = data.species === 'dog' ? '🐕 Perro' : '🐈 Gato'
+  const message = `
+🐾 *NUEVO INTERÉS DE ADOPCIÓN*
+━━━━━━━━━━━━━━━━━━━━
+
+🏷 *Mascota:* ${data.petName}
+${speciesLabel}${data.breed ? ` · ${data.breed}` : ''}
+
+🏠 *Fundación:* ${data.foundationName}
+${data.foundationWhatsapp ? `📱 *WhatsApp:* ${data.foundationWhatsapp}` : ''}
+
+Un adoptante abrió el chat de WhatsApp para postularse.
+━━━━━━━━━━━━━━━━━━━━
+⏰ ${new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' })}
+`.trim()
+
+  return sendTelegramMessage(message)
+}
+
 /**
  * Envía un mensaje genérico a Telegram
  */

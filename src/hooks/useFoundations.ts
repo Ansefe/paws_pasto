@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
-import type { Foundation, FoundationWithPetCount } from '@/types/database.types'
+import type { Foundation, FoundationWithPetCount, Pet } from '@/types/database.types'
 
 interface UseFoundationsReturn {
   foundations: FoundationWithPetCount[]
@@ -118,7 +118,7 @@ export function useFoundation(foundationId: string | null): UseFoundationReturn 
 
 // Hook para obtener mascotas de una fundación específica
 export function useFoundationPets(foundationId: string | null) {
-  const [pets, setPets] = useState<any[]>([])
+  const [pets, setPets] = useState<Pet[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 

@@ -21,6 +21,18 @@ import {
   DialogContent,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { supabase } from "@/lib/supabase"
+import { sendAdoptionInterestNotification } from "@/lib/telegram"
+
+// Construye una URL de WhatsApp (wa.me) a partir de un número y un mensaje.
+// Normaliza el número a dígitos y antepone el código de Colombia (57) si falta.
+function buildWhatsappUrl(rawNumber: string, message: string): string {
+  let digits = rawNumber.replace(/\D/g, "")
+  if (digits.length === 10 && digits.startsWith("3")) {
+    digits = "57" + digits // celular colombiano sin código de país
+  }
+  return `https://wa.me/${digits}?text=${encodeURIComponent(message)}`
+}
 
 // Tipo de mascota (simplificado para el modal)
 export interface PetForModal {
@@ -104,6 +116,33 @@ export function PetDetailModal({ pet, isOpen, onClose }: PetDetailModalProps) {
 
   const prevImage = () => {
     setCurrentImageIndex((prev) => (prev - 1 + allImages.length) % allImages.length)
+  }
+
+  // Flujo de postulación: abre WhatsApp con la fundación, notifica por Telegram
+  // y marca la mascota "en proceso" (sin bloquear nuevas postulaciones).
+  const handleAdopt = () => {
+    if (!pet) return
+
+    const whatsapp = pet.foundation.whatsapp
+    const pronoun = pet.gender === "female" ? "la" : "lo"
+    const message = `¡Hola! Vi a *${pet.name}* en Paws y me encantaría postularme para adoptar${pronoun}. ¿Me pueden dar más información?`
+
+    // 1. Abrir WhatsApp de la fundación (si tiene número configurado)
+    if (whatsapp) {
+      window.open(buildWhatsappUrl(whatsapp, message), "_blank", "noopener,noreferrer")
+    }
+
+    // 2. Notificar al equipo por Telegram (best-effort)
+    void sendAdoptionInterestNotification({
+      petName: pet.name,
+      species: pet.species,
+      breed: pet.breed,
+      foundationName: pet.foundation.name,
+      foundationWhatsapp: whatsapp,
+    })
+
+    // 3. Marcar la mascota "en proceso" (best-effort; no bloquea otras postulaciones)
+    void supabase.rpc("mark_pet_in_process", { pet_id: pet.id })
   }
 
   // Características de la mascota
@@ -220,18 +259,20 @@ export function PetDetailModal({ pet, isOpen, onClose }: PetDetailModalProps) {
                 </span>
               </div>
               
-              {/* Frase de la mascota */}
-              <motion.div 
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                className="bg-gradient-to-r from-brand-yellow-100 to-brand-yellow-50 rounded-2xl p-4 mt-4"
-              >
-                <p className="text-gray-700 font-medium flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 text-brand-yellow-600" />
-                  <span className="italic">"{getRandomPhrase(adoptionPhrases.available)}"</span>
-                </p>
-              </motion.div>
+              {/* Frase de la mascota (solo si está disponible) */}
+              {pet.status === "available" && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                  className="bg-gradient-to-r from-brand-yellow-100 to-brand-yellow-50 rounded-2xl p-4 mt-4"
+                >
+                  <p className="text-gray-700 font-medium flex items-center gap-2">
+                    <Sparkles className="w-5 h-5 text-brand-yellow-600" />
+                    <span className="italic">"{getRandomPhrase(adoptionPhrases.available)}"</span>
+                  </p>
+                </motion.div>
+              )}
             </div>
 
             {/* Características básicas */}
@@ -309,36 +350,42 @@ export function PetDetailModal({ pet, isOpen, onClose }: PetDetailModalProps) {
 
             {/* CTAs */}
             <div className="mt-auto space-y-3">
-              {pet.status === "available" ? (
+              {pet.status === "adopted" ? (
+                <div className="bg-pink-50 border border-pink-200 rounded-xl p-4 text-center">
+                  <p className="text-pink-800 font-medium">
+                    🎉 ¡Ya encontré mi hogar para siempre!
+                  </p>
+                  <p className="text-pink-600 text-sm mt-1">
+                    Gracias por tu interés. Hay muchos más amigos esperándote
+                  </p>
+                </div>
+              ) : (
                 <>
-                  {/* CTA Principal - Postularse */}
-                  <Button 
-                    size="lg" 
+                  {/* Aviso si ya hay alguien en proceso (no bloquea postularse) */}
+                  {pet.status === "in_process" && (
+                    <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-center">
+                      <p className="text-amber-800 text-sm font-medium">
+                        🤝 Ya hay alguien interesado, ¡pero aún puedes postularte!
+                      </p>
+                    </div>
+                  )}
+
+                  {/* CTA Principal - Postularse vía WhatsApp */}
+                  <Button
+                    onClick={handleAdopt}
+                    size="lg"
                     className="w-full bg-gradient-to-r from-brand-sky to-blue-600 hover:from-brand-sky-600 hover:to-blue-700 text-white font-semibold rounded-xl h-14 text-base shadow-lg shadow-brand-sky/25"
                   >
-                    <Sparkles className="w-5 h-5 mr-2" />
+                    <MessageCircle className="w-5 h-5 mr-2" />
                     {getRandomPhrase(adoptionPhrases.cta)}
                   </Button>
 
-                  {/* CTA Secundario - WhatsApp */}
-                  <Button 
-                    variant="outline"
-                    size="lg"
-                    className="w-full border-2 border-green-500 text-green-600 hover:bg-green-50 font-semibold rounded-xl h-12"
-                  >
-                    <MessageCircle className="w-5 h-5 mr-2" />
-                    {adoptionPhrases.whatsapp}
-                  </Button>
+                  {!pet.foundation.whatsapp && (
+                    <p className="text-xs text-gray-400 text-center">
+                      Esta fundación aún no tiene WhatsApp configurado; igual avisaremos a nuestro equipo.
+                    </p>
+                  )}
                 </>
-              ) : (
-                <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-center">
-                  <p className="text-amber-800 font-medium">
-                    🤝 Ya estoy en proceso de conocer a alguien especial
-                  </p>
-                  <p className="text-amber-600 text-sm mt-1">
-                    Pero hay muchos más amigos esperándote
-                  </p>
-                </div>
               )}
             </div>
           </div>

@@ -39,35 +39,27 @@ export function LoginModal({ isOpen, onClose, onSwitchToApplication }: LoginModa
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    console.log('[LOGIN] handleSubmit called')
     setIsLoading(true)
     setError(null)
 
     try {
-      console.log('[LOGIN] Calling signIn...')
       const { error: signInError, profile } = await signIn(email, password)
-      
-      console.log('[LOGIN] signIn returned:', { signInError, profile })
-      
+
       if (signInError) {
-        console.log('[LOGIN] Error received:', signInError.message)
-        setError(signInError.message === "Invalid login credentials" 
+        setError(signInError.message === "Invalid login credentials"
           ? "Credenciales inválidas. Verifica tu email y contraseña."
           : signInError.message)
         setIsLoading(false)
         return
       }
 
-      console.log('[LOGIN] Success! Setting success state')
       setSuccess(true)
-      
+
       // Esperar un momento y luego cerrar/redirigir
       setTimeout(() => {
-        console.log('[LOGIN] Timeout fired, closing modal. Profile role:', profile?.role)
         onClose()
         // Si es admin, redirigir al panel
         if (profile?.role === 'admin') {
-          console.log('[LOGIN] Navigating to /admin')
           navigate('/admin')
         }
       }, 1500)
@@ -75,7 +67,6 @@ export function LoginModal({ isOpen, onClose, onSwitchToApplication }: LoginModa
       console.error('[LOGIN] Exception:', err)
       setError("Error al iniciar sesión. Intenta de nuevo.")
     } finally {
-      console.log('[LOGIN] Finally block, setting isLoading false')
       setIsLoading(false)
     }
   }

@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { sendTelegramNotification } from "@/lib/telegram"
+import { supabase } from "@/lib/supabase"
 
 interface ApplicationModalProps {
   isOpen: boolean
@@ -79,6 +80,27 @@ export function ApplicationModal({ isOpen, onClose, onSwitchToLogin }: Applicati
         references: formData.references,
       }
 
+      // Persistir la postulación en la BD para que el admin pueda revisarla
+      // (best-effort: si falla, no bloqueamos el envío por Telegram/email).
+      const { error: dbError } = await supabase.from('applications').insert({
+        type: applicationData.type,
+        organization_name: applicationData.organizationName,
+        contact_name: applicationData.contactName,
+        email: applicationData.email,
+        phone: applicationData.phone,
+        city: applicationData.city,
+        address: applicationData.address || null,
+        description: applicationData.description || null,
+        experience: applicationData.experience || null,
+        instagram: applicationData.instagram || null,
+        facebook: applicationData.facebook || null,
+        website: applicationData.website || null,
+        references_info: formData.references || null,
+      })
+      if (dbError) {
+        console.error("No se pudo guardar la postulación en la BD:", dbError)
+      }
+
       // Intentar enviar por Telegram primero
       const telegramSuccess = await sendTelegramNotification(applicationData)
       
@@ -129,9 +151,8 @@ export function ApplicationModal({ isOpen, onClose, onSwitchToLogin }: Applicati
         }
       }
 
-      // Si ningún método está configurado, mostrar éxito de todas formas
-      // pero guardar en console para debug
-      console.log("Postulación recibida (sin servicio de envío configurado):", applicationData)
+      // Si ningún método de notificación está configurado, igual mostramos éxito:
+      // la postulación ya quedó persistida en la BD para revisión del admin.
       setStep("success")
 
     } catch {

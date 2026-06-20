@@ -11,6 +11,7 @@ import DonatePage from '@/pages/Donate'
 import AdminDashboard from '@/pages/admin/AdminDashboard'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { SiteConfigProvider } from '@/contexts/SiteConfigContext'
+import { ToastProvider } from '@/contexts/ToastContext'
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
 
 // Layout para páginas públicas (con header y footer)
@@ -64,7 +65,9 @@ function App() {
     <Router>
       <AuthProvider>
         <SiteConfigProvider>
-          <AppContent />
+          <ToastProvider>
+            <AppContent />
+          </ToastProvider>
         </SiteConfigProvider>
       </AuthProvider>
     </Router>

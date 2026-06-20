@@ -26,6 +26,7 @@ import { AddUserModal } from "@/components/admin/AddUserModal"
 import { EditUserModal } from "@/components/admin/EditUserModal"
 import { UserDetailsModal } from "@/components/admin/UserDetailsModal"
 import { supabase } from "@/lib/supabase"
+import { useToast } from "@/contexts/ToastContext"
 import type { Profile } from "@/types/database.types"
 
 const roleLabels: Record<string, { label: string; color: string; icon: typeof User }> = {
@@ -35,6 +36,7 @@ const roleLabels: Record<string, { label: string; color: string; icon: typeof Us
 }
 
 export function AdminUsers() {
+  const toast = useToast()
   const [searchTerm, setSearchTerm] = useState("")
   const [roleFilter, setRoleFilter] = useState<string>("all")
   
@@ -105,25 +107,23 @@ export function AdminUsers() {
         console.error("Error RPC:", error)
         // Fallback: Si la RPC no existe o falla, intentamos borrar solo perfil
         // Esto es útil si el usuario no ha ejecutado el script SQL aún
-        console.log("Intentando borrado manual de perfil...")
         const { error: profileError } = await supabase
           .from('profiles')
           .delete()
           .eq('id', userToDelete.id)
-        
+
         if (profileError) throw profileError
       }
 
       // Actualizamos la lista localmente
+      const name = userToDelete.full_name || "El usuario"
       setUsers(users.filter(u => u.id !== userToDelete.id))
       setUserToDelete(null)
-      
-      // Mostrar éxito (opcional, podrías usar un toast aquí)
-      alert("Usuario eliminado correctamente")
-      
+      toast.success("Usuario eliminado", `${name} se eliminó correctamente`)
+
     } catch (err) {
       console.error("Error deleting user:", err)
-      alert("No se pudo eliminar el usuario completamente. Asegúrate de haber ejecutado el script 'rpc_delete_user.sql' en Supabase.")
+      toast.error("No se pudo eliminar el usuario", "Verifica haber ejecutado 'rpc_delete_user.sql' en Supabase.")
     } finally {
       setIsDeleting(false)
     }

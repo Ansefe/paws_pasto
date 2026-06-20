@@ -31,3 +31,35 @@ export function createIsolatedClient() {
 export function getStorageUrl(bucket: string, path: string): string {
   return `${supabaseUrl}/storage/v1/object/public/${bucket}/${path}`
 }
+
+const IMAGES_BUCKET = 'images'
+
+/**
+ * Sube un archivo de imagen al bucket `images` dentro de la carpeta indicada
+ * (p. ej. `pets`) y devuelve la URL pública.
+ */
+export async function uploadImage(file: File, folder: string): Promise<string> {
+  const fileExt = file.name.split('.').pop() || 'jpg'
+  const filePath = `${folder}/${crypto.randomUUID()}.${fileExt}`
+
+  const { error } = await supabase.storage.from(IMAGES_BUCKET).upload(filePath, file, {
+    cacheControl: '3600',
+    upsert: false,
+  })
+  if (error) throw error
+
+  const { data } = supabase.storage.from(IMAGES_BUCKET).getPublicUrl(filePath)
+  return data.publicUrl
+}
+
+/**
+ * Elimina una imagen del bucket `images` a partir de su URL pública.
+ * No lanza error si la URL no pertenece al bucket (se ignora silenciosamente).
+ */
+export async function deleteImageByUrl(publicUrl: string): Promise<void> {
+  const marker = `/storage/v1/object/public/${IMAGES_BUCKET}/`
+  const idx = publicUrl.indexOf(marker)
+  if (idx === -1) return
+  const path = publicUrl.substring(idx + marker.length)
+  await supabase.storage.from(IMAGES_BUCKET).remove([path])
+}

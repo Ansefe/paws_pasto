@@ -30,7 +30,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Fetch profile data
   const fetchProfile = async (userId: string): Promise<Profile | null> => {
-    console.log('[AUTH] fetchProfile called with userId:', userId)
     try {
       const { data, error } = await supabase
         .from('profiles')
@@ -43,7 +42,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return null
       }
 
-      console.log('[AUTH] Profile found:', data)
       return data as Profile
     } catch (error) {
       console.error('[AUTH] Exception in fetchProfile:', error)
@@ -53,26 +51,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Initialize auth state
   useEffect(() => {
-    console.log('[AUTH] useEffect running')
     let isMounted = true
-    
+
     const initAuth = async () => {
       try {
         // Primero obtener sesión
         const { data: { session } } = await supabase.auth.getSession()
-        console.log('[AUTH] Session exists:', !!session)
-        
+
         if (!isMounted) return
-        
+
         setSession(session)
         setUser(session?.user ?? null)
-        
+
         // Si hay usuario, intentar cargar perfil (pero no bloquear si falla)
         if (session?.user) {
           fetchProfile(session.user.id).then(profileData => {
             if (isMounted) {
               setProfile(profileData)
-              console.log('[AUTH] Profile loaded:', profileData?.role)
             }
           }).catch(err => {
             console.error('[AUTH] Profile fetch failed:', err)
@@ -91,11 +86,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        console.log('[AUTH] onAuthStateChange:', event)
-        
+      (_event, session) => {
         if (!isMounted) return
-        
+
         setSession(session)
         setUser(session?.user ?? null)
 
@@ -118,43 +111,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Sign in with email and password
   const signIn = async (email: string, password: string) => {
-    console.log('[AUTH] signIn called')
     try {
       setIsLoading(true)
-      console.log('[AUTH] Calling supabase.auth.signInWithPassword...')
-      
+
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
 
-      console.log('[AUTH] signInWithPassword result:', { data, error })
-
       if (error) {
-        console.log('[AUTH] Auth error, returning')
         setIsLoading(false)
         return { error: new Error(error.message), profile: null }
       }
 
       // Cargar el perfil inmediatamente después del login
       if (data.user) {
-        console.log('[AUTH] User found, fetching profile for:', data.user.id)
         const profileData = await fetchProfile(data.user.id)
-        
-        console.log('[AUTH] Profile data received:', profileData)
-        
+
         // Si no existe perfil, cerrar sesión y mostrar error
         if (!profileData) {
-          console.log('[AUTH] No profile found, signing out')
           await supabase.auth.signOut()
           setIsLoading(false)
-          return { 
-            error: new Error('No tienes un perfil autorizado. Contacta al administrador.'), 
-            profile: null 
+          return {
+            error: new Error('No tienes un perfil autorizado. Contacta al administrador.'),
+            profile: null
           }
         }
-        
-        console.log('[AUTH] Setting state and returning success')
+
         setProfile(profileData)
         setUser(data.user)
         setSession(data.session)
@@ -162,7 +145,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { error: null, profile: profileData }
       }
 
-      console.log('[AUTH] No user in response')
       setIsLoading(false)
       return { error: null, profile: null }
     } catch (error) {
@@ -175,7 +157,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Sign up with email and password
   const signUp = async (email: string, password: string, fullName: string) => {
     try {
-      const { data, error } = await supabase.auth.signUp({
+      const { error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -189,12 +171,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { error: new Error(error.message) }
       }
 
-      // Profile is created automatically by Supabase trigger
-      // Just log success
-      if (data.user) {
-        console.log('User created successfully:', data.user.id)
-      }
-
+      // El perfil se crea automáticamente mediante el trigger de Supabase
       return { error: null }
     } catch (error) {
       return { error: error as Error }

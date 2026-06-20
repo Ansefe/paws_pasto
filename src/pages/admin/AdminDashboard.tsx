@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom"
 import { motion } from "framer-motion"
 import {
   LayoutDashboard, Users, Building2, PawPrint, Settings,
-  ChevronRight, LogOut, Menu, X
+  Inbox, ChevronRight, LogOut, Menu, X
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useAuth } from "@/contexts/AuthContext"
@@ -13,15 +13,17 @@ import { AdminOverview } from "./sections/AdminOverview"
 import { AdminUsers } from "./sections/AdminUsers"
 import { AdminFoundations } from "./sections/AdminFoundations"
 import { AdminPets } from "./sections/AdminPets"
+import { AdminApplications } from "./sections/AdminApplications"
 import { AdminSettings } from "./sections/AdminSettings"
 
-type AdminSection = "overview" | "users" | "foundations" | "pets" | "settings"
+type AdminSection = "overview" | "users" | "foundations" | "pets" | "applications" | "settings"
 
 const menuItems = [
   { id: "overview" as const, label: "Dashboard", icon: LayoutDashboard },
   { id: "users" as const, label: "Usuarios", icon: Users },
   { id: "foundations" as const, label: "Fundaciones", icon: Building2 },
   { id: "pets" as const, label: "Mascotas", icon: PawPrint },
+  { id: "applications" as const, label: "Solicitudes", icon: Inbox },
   { id: "settings" as const, label: "Configuración", icon: Settings },
 ]
 
@@ -52,6 +54,8 @@ export default function AdminDashboard() {
         return <AdminFoundations />
       case "pets":
         return <AdminPets />
+      case "applications":
+        return <AdminApplications />
       case "settings":
         return <AdminSettings />
       default:

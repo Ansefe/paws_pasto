@@ -38,8 +38,6 @@ export function AddUserModal({ isOpen, onClose, onUserCreated }: AddUserModalPro
     setIsLoading(true)
 
     try {
-      console.log("Iniciando creación de usuario:", { ...formData, password: "***" })
-      
       // Validar rol
       const validRoles: UserRole[] = ["adopter", "foundation", "admin"]
       if (!validRoles.includes(formData.role)) {
@@ -66,8 +64,6 @@ export function AddUserModal({ isOpen, onClose, onUserCreated }: AddUserModalPro
       if (authError) throw authError
       if (!authData.user) throw new Error("No se pudo crear el usuario")
 
-      console.log("Usuario creado:", authData.user.id)
-
       // 2. Esperar a que el trigger cree el perfil y verificar datos
       // Intentamos varias veces con polling para asegurar que el perfil existe
       let existingProfile = null
@@ -85,10 +81,8 @@ export function AddUserModal({ isOpen, onClose, onUserCreated }: AddUserModalPro
         
         if (data) {
           existingProfile = data
-          console.log("Perfil encontrado:", data)
         } else {
           attempts++
-          console.log(`Esperando creación de perfil... intento ${attempts}`)
         }
       }
 
@@ -104,7 +98,6 @@ export function AddUserModal({ isOpen, onClose, onUserCreated }: AddUserModalPro
         existingProfile.full_name !== formData.fullName
 
       if (needsUpdate) {
-        console.log("Datos del perfil incompletos o incorrectos, aplicando actualización manual...")
         const { error: profileError } = await supabase
           .from('profiles')
           .update({
@@ -120,9 +113,6 @@ export function AddUserModal({ isOpen, onClose, onUserCreated }: AddUserModalPro
           console.error("Error actualizando perfil:", profileError)
           throw new Error(`Error al actualizar perfil: ${profileError.message}`)
         }
-        console.log("Perfil actualizado manualmente.")
-      } else {
-        console.log("El perfil se creó correctamente con todos los datos. No se requiere actualización.")
       }
 
       setSuccess(true)
