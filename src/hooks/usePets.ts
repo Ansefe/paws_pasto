@@ -1,11 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
-import type { PetWithFoundation, PetSpecies, PetSize, PetGender, PetStatus, Foundation } from '@/types/database.types'
-
-// Tipo para la respuesta de Supabase con join
-type PetQueryResult = PetWithFoundation & {
-  foundation: Pick<Foundation, 'id' | 'foundation_name' | 'location_city' | 'whatsapp_number'>
-}
+import type { PetWithFoundation, PetSpecies, PetSize, PetGender, PetStatus } from '@/types/database.types'
 
 export interface PetFilters {
   species?: PetSpecies | 'all'
@@ -15,6 +10,8 @@ export interface PetFilters {
   good_with_kids?: boolean
   good_with_pets?: boolean
   search?: string
+  // Modo admin: incluye todos los estados (adopted/paused), no solo disponibles
+  adminMode?: boolean
 }
 
 interface UsePetsReturn {
@@ -66,8 +63,9 @@ export function usePets(filters?: PetFilters): UsePetsReturn {
       }
       if (filters?.status && filters.status !== 'all') {
         query = query.eq('status', filters.status)
-      } else {
-        // Por defecto, mostrar solo disponibles y en proceso
+      } else if (!filters?.adminMode) {
+        // Por defecto (vista pública), mostrar solo disponibles y en proceso.
+        // En modo admin se muestran todos los estados.
         query = query.in('status', ['available', 'in_process'])
       }
       if (filters?.good_with_kids) {
@@ -84,20 +82,14 @@ export function usePets(filters?: PetFilters): UsePetsReturn {
 
       if (queryError) throw queryError
 
-      // Transformar los datos al tipo esperado
-      const petsWithFoundation: PetWithFoundation[] = (data || []).map((pet: any) => ({
-        ...pet,
-        foundation: pet.foundation
-      }))
-
-      setPets(petsWithFoundation)
+      setPets((data ?? []) as PetWithFoundation[])
     } catch (err) {
       console.error('Error fetching pets:', err)
       setError(err instanceof Error ? err.message : 'Error al cargar las mascotas')
     } finally {
       setLoading(false)
     }
-  }, [filters?.species, filters?.size, filters?.gender, filters?.status, filters?.good_with_kids, filters?.good_with_pets, filters?.search])
+  }, [filters?.species, filters?.size, filters?.gender, filters?.status, filters?.good_with_kids, filters?.good_with_pets, filters?.search, filters?.adminMode])
 
   useEffect(() => {
     fetchPets()
@@ -185,12 +177,7 @@ export function useFeaturedPets(limit: number = 6): UsePetsReturn {
 
       if (queryError) throw queryError
 
-      const petsWithFoundation: PetWithFoundation[] = (data || []).map((pet: any) => ({
-        ...pet,
-        foundation: pet.foundation
-      }))
-
-      setPets(petsWithFoundation)
+      setPets((data ?? []) as PetWithFoundation[])
     } catch (err) {
       console.error('Error fetching featured pets:', err)
       setError(err instanceof Error ? err.message : 'Error al cargar las mascotas destacadas')

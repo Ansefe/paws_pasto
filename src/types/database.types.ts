@@ -16,6 +16,8 @@ export type PetGender = 'male' | 'female'
 export type PetSize = 'small' | 'medium' | 'large'
 export type PetStatus = 'available' | 'in_process' | 'adopted' | 'paused'
 export type AdoptionStatus = 'pending' | 'approved' | 'rejected' | 'cancelled'
+export type ApplicantType = 'foundation' | 'rescuer'
+export type ApplicationStatus = 'pending' | 'approved' | 'rejected'
 
 export interface Database {
   public: {
@@ -48,6 +50,7 @@ export interface Database {
           created_at?: string
           updated_at?: string
         }
+        Relationships: []
       }
       foundations: {
         Row: {
@@ -107,6 +110,15 @@ export interface Database {
           created_at?: string
           updated_at?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: "foundations_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       pets: {
         Row: {
@@ -175,6 +187,15 @@ export interface Database {
           created_at?: string
           updated_at?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: "pets_foundation_id_fkey"
+            columns: ["foundation_id"]
+            isOneToOne: false
+            referencedRelation: "foundations"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       favorites: {
         Row: {
@@ -195,6 +216,22 @@ export interface Database {
           pet_id?: string
           created_at?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: "favorites_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "favorites_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
+            referencedRelation: "pets"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       adoptions: {
         Row: {
@@ -236,6 +273,92 @@ export interface Database {
           updated_at?: string
           resolved_at?: string | null
         }
+        Relationships: [
+          {
+            foreignKeyName: "adoptions_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
+            referencedRelation: "pets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "adoptions_adopter_id_fkey"
+            columns: ["adopter_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "adoptions_foundation_id_fkey"
+            columns: ["foundation_id"]
+            isOneToOne: false
+            referencedRelation: "foundations"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      applications: {
+        Row: {
+          id: string
+          type: ApplicantType
+          organization_name: string
+          contact_name: string
+          email: string
+          phone: string
+          city: string
+          address: string | null
+          description: string | null
+          experience: string | null
+          instagram: string | null
+          facebook: string | null
+          website: string | null
+          references_info: string | null
+          status: ApplicationStatus
+          review_notes: string | null
+          created_at: string
+          reviewed_at: string | null
+        }
+        Insert: {
+          id?: string
+          type: ApplicantType
+          organization_name: string
+          contact_name: string
+          email: string
+          phone: string
+          city: string
+          address?: string | null
+          description?: string | null
+          experience?: string | null
+          instagram?: string | null
+          facebook?: string | null
+          website?: string | null
+          references_info?: string | null
+          status?: ApplicationStatus
+          review_notes?: string | null
+          created_at?: string
+          reviewed_at?: string | null
+        }
+        Update: {
+          id?: string
+          type?: ApplicantType
+          organization_name?: string
+          contact_name?: string
+          email?: string
+          phone?: string
+          city?: string
+          address?: string | null
+          description?: string | null
+          experience?: string | null
+          instagram?: string | null
+          facebook?: string | null
+          website?: string | null
+          references_info?: string | null
+          status?: ApplicationStatus
+          review_notes?: string | null
+          created_at?: string
+          reviewed_at?: string | null
+        }
+        Relationships: []
       }
       site_settings: {
         Row: {
@@ -259,6 +382,20 @@ export interface Database {
           created_at?: string
           updated_at?: string
         }
+        Relationships: []
+      }
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      delete_user_complete: {
+        Args: { target_user_id: string }
+        Returns: undefined
+      }
+      mark_pet_in_process: {
+        Args: { pet_id: string }
+        Returns: undefined
       }
     }
     Enums: {
@@ -269,15 +406,31 @@ export interface Database {
       pet_status: PetStatus
       adoption_status: AdoptionStatus
     }
+    CompositeTypes: {
+      [_ in never]: never
+    }
   }
 }
 
 // Tipos de conveniencia para usar en la app
 export type Profile = Database['public']['Tables']['profiles']['Row']
 export type Foundation = Database['public']['Tables']['foundations']['Row']
+export type FoundationInsert = Database['public']['Tables']['foundations']['Insert']
+export type FoundationUpdate = Database['public']['Tables']['foundations']['Update']
 export type Pet = Database['public']['Tables']['pets']['Row']
+export type PetInsert = Database['public']['Tables']['pets']['Insert']
+export type PetUpdate = Database['public']['Tables']['pets']['Update']
 export type Favorite = Database['public']['Tables']['favorites']['Row']
 export type Adoption = Database['public']['Tables']['adoptions']['Row']
+export type Application = Database['public']['Tables']['applications']['Row']
+export type ApplicationInsert = Database['public']['Tables']['applications']['Insert']
+
+// Adopción con datos relacionados (mascota, adoptante, fundación)
+export type AdoptionWithRelations = Adoption & {
+  pet: Pick<Pet, 'id' | 'name' | 'main_photo_url' | 'species'> | null
+  adopter: Pick<Profile, 'id' | 'full_name' | 'phone'> | null
+  foundation: Pick<Foundation, 'id' | 'foundation_name'> | null
+}
 
 // Tipo extendido de Pet con información de la fundación
 export type PetWithFoundation = Pet & {

@@ -137,6 +137,11 @@ function PetCard({ pet, onClick }: { pet: PetWithFoundation; onClick: () => void
                 En proceso
               </div>
             )}
+            {pet.status === "adopted" && (
+              <div className="absolute top-3 left-3 bg-pink-500 text-white text-xs font-medium px-3 py-1 rounded-full">
+                🎉 Adoptado
+              </div>
+            )}
             
             {/* Botón favorito */}
             <button
@@ -334,16 +339,20 @@ const initialFilters = {
 
 export function AdoptPage() {
   const [filters, setFilters] = useState(initialFilters)
+  const [tab, setTab] = useState<"available" | "adopted">("available")
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
   const [selectedPet, setSelectedPet] = useState<PetForModal | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
 
-  // Obtener mascotas desde Supabase con filtros
+  // Obtener mascotas desde Supabase con filtros.
+  // Pestaña "available" → disponibles + en proceso (comportamiento por defecto).
+  // Pestaña "adopted"   → solo adoptadas (finales felices).
   const { pets, loading, error } = usePets({
     species: filters.species !== "all" ? filters.species as PetSpecies : undefined,
     size: filters.size !== "all" ? filters.size as PetSize : undefined,
     gender: filters.gender !== "all" ? filters.gender as PetGender : undefined,
-    search: filters.search || undefined
+    search: filters.search || undefined,
+    status: tab === "adopted" ? "adopted" : undefined,
   })
 
   const openPetModal = (pet: PetWithFoundation) => {
@@ -383,12 +392,34 @@ export function AdoptPage() {
             transition={{ duration: 0.6 }}
           >
             <h1 className="text-3xl md:text-4xl font-bold text-white mb-3">
-              Encuentra a tu compañero ideal 🐾
+              {tab === "adopted" ? "Finales felices 🎉" : "Encuentra a tu compañero ideal 🐾"}
             </h1>
             <p className="text-white/80 text-lg">
-              {filteredPets.filter(p => p.status === "available").length} mascotas esperando un hogar en Pasto
+              {tab === "adopted"
+                ? `${filteredPets.length} ${filteredPets.length === 1 ? "mascota ya encontró" : "mascotas ya encontraron"} su hogar`
+                : `${filteredPets.length} ${filteredPets.length === 1 ? "mascota espera" : "mascotas esperan"} un hogar en Pasto`}
             </p>
           </motion.div>
+
+          {/* Pestañas: En adopción / Adoptados */}
+          <div className="mt-6 inline-flex gap-1 bg-white/15 backdrop-blur-sm p-1 rounded-full">
+            <button
+              onClick={() => setTab("available")}
+              className={`px-5 py-2 rounded-full text-sm font-semibold transition-all ${
+                tab === "available" ? "bg-white text-brand-sky shadow" : "text-white hover:bg-white/10"
+              }`}
+            >
+              En adopción
+            </button>
+            <button
+              onClick={() => setTab("adopted")}
+              className={`px-5 py-2 rounded-full text-sm font-semibold transition-all ${
+                tab === "adopted" ? "bg-white text-brand-sky shadow" : "text-white hover:bg-white/10"
+              }`}
+            >
+              Adoptados
+            </button>
+          </div>
         </div>
       </section>
 
@@ -603,21 +634,25 @@ export function AdoptPage() {
             </AnimatePresence>
           </motion.div>
         ) : (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className="text-center py-16"
           >
-            <div className="text-6xl mb-4">🔍</div>
+            <div className="text-6xl mb-4">{tab === "adopted" ? "🎉" : "🔍"}</div>
             <h3 className="text-xl font-semibold text-gray-900 mb-2">
-              No encontramos mascotas
+              {tab === "adopted" ? "Aún no hay finales felices" : "No encontramos mascotas"}
             </h3>
             <p className="text-gray-600 mb-6">
-              Intenta ajustar los filtros para ver más resultados
+              {tab === "adopted"
+                ? "Cuando una mascota sea adoptada, aparecerá aquí"
+                : "Intenta ajustar los filtros para ver más resultados"}
             </p>
-            <Button onClick={clearFilters} variant="outline" className="rounded-full">
-              Limpiar filtros
-            </Button>
+            {tab !== "adopted" && (
+              <Button onClick={clearFilters} variant="outline" className="rounded-full">
+                Limpiar filtros
+              </Button>
+            )}
           </motion.div>
         )}
       </section>

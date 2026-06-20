@@ -33,8 +33,6 @@ export function EditUserModal({ user, isOpen, onClose, onUserUpdated }: EditUser
 
   useEffect(() => {
     if (user && isOpen) {
-      console.log("Cargando datos para editar:", user)
-      
       // Asegurar que el rol sea válido
       let safeRole: UserRole = "adopter"
       if (user.role === "admin" || user.role === "foundation" || user.role === "adopter") {
@@ -62,8 +60,6 @@ export function EditUserModal({ user, isOpen, onClose, onUserUpdated }: EditUser
     setIsLoading(true)
 
     try {
-      console.log("Actualizando usuario:", { id: user.id, ...formData })
-      
       const { error: updateError } = await supabase
         .from('profiles')
         .update({
