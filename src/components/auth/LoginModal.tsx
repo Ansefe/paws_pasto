@@ -2,7 +2,7 @@ import { useState, useEffect } from "react"
 import { createPortal } from "react-dom"
 import { useNavigate } from "react-router-dom"
 import { motion, AnimatePresence } from "framer-motion"
-import { X, Mail, Lock, PawPrint, Eye, EyeOff, Building2, UserPlus, ArrowRight, Info, CheckCircle2 } from "lucide-react"
+import { X, Mail, Lock, User, PawPrint, Eye, EyeOff, Building2, UserPlus, ArrowRight, Info, CheckCircle2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -15,15 +15,19 @@ interface LoginModalProps {
 }
 
 export function LoginModal({ isOpen, onClose, onSwitchToApplication }: LoginModalProps) {
+  const [mode, setMode] = useState<"login" | "register">("login")
+  const [fullName, setFullName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
-  
-  const { signIn } = useAuth()
+
+  const { signIn, signUp } = useAuth()
   const navigate = useNavigate()
+
+  const isRegister = mode === "register"
 
   // Bloquear scroll cuando el modal está abierto
   useEffect(() => {
@@ -37,12 +41,45 @@ export function LoginModal({ isOpen, onClose, onSwitchToApplication }: LoginModa
     }
   }, [isOpen])
 
+  const resetForm = () => {
+    setError(null)
+    setSuccess(false)
+    setPassword("")
+  }
+
+  const switchMode = () => {
+    setMode((m) => (m === "login" ? "register" : "login"))
+    resetForm()
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
     setError(null)
 
     try {
+      if (isRegister) {
+        // Registro de adoptante. El trigger crea el perfil con rol 'adopter'.
+        const { error: signUpError } = await signUp(email, password, fullName)
+        if (signUpError) {
+          setError(signUpError.message)
+          setIsLoading(false)
+          return
+        }
+        // Intentar iniciar sesión de inmediato (si no requiere confirmación por email).
+        const { error: signInError } = await signIn(email, password)
+        setSuccess(true)
+        setTimeout(() => {
+          onClose()
+          if (signInError) {
+            // Probablemente requiere confirmación por email; no redirigimos.
+          } else {
+            navigate("/perfil")
+          }
+        }, 1500)
+        return
+      }
+
       const { error: signInError, profile } = await signIn(email, password)
 
       if (signInError) {
@@ -65,7 +102,7 @@ export function LoginModal({ isOpen, onClose, onSwitchToApplication }: LoginModa
       }, 1500)
     } catch (err) {
       console.error('[LOGIN] Exception:', err)
-      setError("Error al iniciar sesión. Intenta de nuevo.")
+      setError("Error al procesar la solicitud. Intenta de nuevo.")
     } finally {
       setIsLoading(false)
     }
@@ -107,8 +144,12 @@ export function LoginModal({ isOpen, onClose, onSwitchToApplication }: LoginModa
             >
               <PawPrint className="w-8 h-8 text-white" />
             </motion.div>
-            <h2 className="text-2xl font-bold text-white mb-1">¡Bienvenido de vuelta!</h2>
-            <p className="text-white/80 text-sm">Inicia sesión en tu cuenta de Paws</p>
+            <h2 className="text-2xl font-bold text-white mb-1">
+              {isRegister ? "Crea tu cuenta" : "¡Bienvenido de vuelta!"}
+            </h2>
+            <p className="text-white/80 text-sm">
+              {isRegister ? "Únete a Paws para guardar favoritos y presumir tus adopciones" : "Inicia sesión en tu cuenta de Paws"}
+            </p>
             
             <button
               onClick={onClose}
@@ -121,6 +162,23 @@ export function LoginModal({ isOpen, onClose, onSwitchToApplication }: LoginModa
           {/* Formulario */}
           <div className="p-6">
             <form onSubmit={handleSubmit} className="space-y-4">
+              {isRegister && (
+                <div className="space-y-2">
+                  <Label htmlFor="fullName" className="text-gray-700">Nombre completo</Label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <Input
+                      id="fullName"
+                      type="text"
+                      placeholder="Tu nombre"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      className="pl-10 h-12 rounded-xl border-gray-200 focus:border-cyan-500 focus:ring-cyan-500"
+                      required
+                    />
+                  </div>
+                </div>
+              )}
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-gray-700">Correo electrónico</Label>
                 <div className="relative">
@@ -193,13 +251,18 @@ export function LoginModal({ isOpen, onClose, onSwitchToApplication }: LoginModa
                     transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
                   />
                 ) : (
-                  "Iniciar Sesión"
+                  isRegister ? "Crear cuenta" : "Iniciar Sesión"
                 )}
               </Button>
 
-              <div className="text-center">
-                <button type="button" className="text-sm text-cyan-600 hover:text-cyan-700 font-medium">
-                  ¿Olvidaste tu contraseña?
+              <div className="text-center text-sm text-gray-500">
+                {isRegister ? "¿Ya tienes cuenta?" : "¿No tienes cuenta?"}{" "}
+                <button
+                  type="button"
+                  onClick={switchMode}
+                  className="text-cyan-600 hover:text-cyan-700 font-medium"
+                >
+                  {isRegister ? "Inicia sesión" : "Regístrate"}
                 </button>
               </div>
             </form>

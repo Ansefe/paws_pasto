@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Link } from "react-router-dom"
+import { Link, useSearchParams } from "react-router-dom"
 import { motion, AnimatePresence } from "framer-motion"
 import { 
   Search, 
@@ -32,38 +32,11 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet"
 import { PetDetailModal } from "@/components/PetDetailModal"
-import { usePets } from "@/hooks/usePets"
+import { usePets, usePet } from "@/hooks/usePets"
+import { useFavorites } from "@/hooks/useFavorites"
+import { adaptPetForModal } from "@/lib/petAdapter"
 import type { PetWithFoundation, PetSpecies, PetSize, PetGender } from "@/types/database.types"
 import type { PetForModal } from "@/components/PetDetailModal"
-
-// Función para adaptar PetWithFoundation al formato del modal
-function adaptPetForModal(pet: PetWithFoundation): PetForModal {
-  return {
-    id: pet.id,
-    name: pet.name,
-    species: pet.species,
-    breed: pet.breed || "Mestizo",
-    age_approx: pet.age_approx || "Desconocida",
-    gender: pet.gender,
-    size: pet.size,
-    description_story: pet.description_story || "",
-    main_photo_url: pet.main_photo_url || "",
-    gallery_urls: pet.gallery_urls || undefined,
-    status: pet.status as "available" | "in_process" | "adopted",
-    is_vaccinated: pet.is_vaccinated,
-    is_sterilized: pet.is_sterilized,
-    is_dewormed: pet.is_dewormed,
-    good_with_kids: pet.good_with_kids ?? undefined,
-    good_with_pets: pet.good_with_pets ?? undefined,
-    special_needs: pet.special_needs ?? undefined,
-    foundation: {
-      name: pet.foundation.foundation_name,
-      location: pet.foundation.location_city,
-      whatsapp: pet.foundation.whatsapp_number ?? undefined
-    }
-  }
-}
-
 
 // Emojis para placeholder de fotos
 const petEmojis = {
@@ -99,8 +72,8 @@ const ageOptions = [
 ]
 
 // Componente de tarjeta de mascota
-function PetCard({ pet, onClick }: { pet: PetWithFoundation; onClick: () => void }) {
-  const [isFavorite, setIsFavorite] = useState(false)
+export function PetCard({ pet, onClick }: { pet: PetWithFoundation; onClick: () => void }) {
+  const { isFavorite, toggleFavorite } = useFavorites()
   const emoji = petEmojis[pet.species][pet.gender]
   
   const sizeLabels = { small: "Pequeño", medium: "Mediano", large: "Grande" }
@@ -148,16 +121,16 @@ function PetCard({ pet, onClick }: { pet: PetWithFoundation; onClick: () => void
               onClick={(e) => {
                 e.preventDefault()
                 e.stopPropagation()
-                setIsFavorite(!isFavorite)
+                toggleFavorite(pet.id)
               }}
               className="absolute top-3 right-3 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-md hover:scale-110 transition-all"
             >
-              <Heart 
+              <Heart
                 className={`w-5 h-5 transition-colors ${
-                  isFavorite 
-                    ? "text-pink-500 fill-pink-500" 
+                  isFavorite(pet.id)
+                    ? "text-pink-500 fill-pink-500"
                     : "text-gray-400 hover:text-pink-400"
-                }`} 
+                }`}
               />
             </button>
           </div>
@@ -342,7 +315,16 @@ export function AdoptPage() {
   const [tab, setTab] = useState<"available" | "adopted">("available")
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
   const [selectedPet, setSelectedPet] = useState<PetForModal | null>(null)
-  const [isModalOpen, setIsModalOpen] = useState(false)
+
+  // Soporte para enlaces compartidos: /adoptar?pet={uuid} abre el modal de esa
+  // mascota automáticamente (funciona con cualquier estado, no solo disponibles).
+  const [searchParams, setSearchParams] = useSearchParams()
+  const sharedPetId = searchParams.get("pet")
+  const { pet: sharedPet } = usePet(sharedPetId)
+
+  // El modal se muestra si el usuario abrió una tarjeta (selectedPet) o si llegó
+  // por un enlace compartido (sharedPet). Derivado, sin efectos ni setState extra.
+  const modalPet = selectedPet ?? (sharedPet ? adaptPetForModal(sharedPet) : null)
 
   // Obtener mascotas desde Supabase con filtros.
   // Pestaña "available" → disponibles + en proceso (comportamiento por defecto).
@@ -357,12 +339,15 @@ export function AdoptPage() {
 
   const openPetModal = (pet: PetWithFoundation) => {
     setSelectedPet(adaptPetForModal(pet))
-    setIsModalOpen(true)
   }
 
   const closePetModal = () => {
-    setIsModalOpen(false)
     setSelectedPet(null)
+    // Si veníamos de un enlace compartido, limpiar el query param.
+    if (sharedPetId) {
+      searchParams.delete("pet")
+      setSearchParams(searchParams, { replace: true })
+    }
   }
 
   // Las mascotas ya vienen filtradas del hook
@@ -675,9 +660,9 @@ export function AdoptPage() {
       </section>
 
       {/* Modal de detalle de mascota */}
-      <PetDetailModal 
-        pet={selectedPet}
-        isOpen={isModalOpen}
+      <PetDetailModal
+        pet={modalPet}
+        isOpen={modalPet !== null}
         onClose={closePetModal}
       />
     </div>

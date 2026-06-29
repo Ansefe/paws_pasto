@@ -9,6 +9,8 @@ import {
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { DonationModal } from "@/components/DonationModal"
+import { TopDonors } from "@/components/TopDonors"
 import { useFoundations } from "@/hooks/useFoundations"
 import type { Foundation } from "@/types/database.types"
 
@@ -27,7 +29,7 @@ const staggerContainer = {
 }
 
 // Componente de tarjeta de donación para fundación
-function DonationCard({ foundation }: { foundation: Foundation }) {
+function DonationCard({ foundation, onDonate }: { foundation: Foundation; onDonate: () => void }) {
   const hasDonationLink = !!foundation.donation_link
   const hasWhatsapp = !!foundation.whatsapp_number
 
@@ -90,25 +92,25 @@ function DonationCard({ foundation }: { foundation: Foundation }) {
 
       {/* Acciones de donación */}
       <div className="px-6 pb-6 space-y-3">
-        {/* Enlace de donación */}
-        {hasDonationLink && (
-          <a
-            href={foundation.donation_link!}
-            target="_blank"
-            rel="noopener noreferrer"
+        {/* Donar (abre modal que registra la intención y redirige al canal oficial) */}
+        {(hasDonationLink || hasWhatsapp) && (
+          <button
+            onClick={onDonate}
             className="flex items-center justify-between w-full p-4 bg-gradient-to-r from-pink-50 to-rose-50 border border-pink-200 rounded-xl hover:border-pink-400 transition-colors group"
           >
             <div className="flex items-center gap-3">
               <div className="p-2 bg-pink-100 rounded-lg group-hover:bg-pink-200 transition-colors">
                 <Heart className="w-5 h-5 text-pink-600" />
               </div>
-              <div>
+              <div className="text-left">
                 <p className="font-semibold text-gray-800">Donar ahora</p>
-                <p className="text-xs text-gray-500">Enlace oficial de donación</p>
+                <p className="text-xs text-gray-500">
+                  {hasDonationLink ? "Enlace oficial de donación" : "Coordinar por WhatsApp"}
+                </p>
               </div>
             </div>
             <ExternalLink className="w-5 h-5 text-pink-500 group-hover:translate-x-1 transition-transform" />
-          </a>
+          </button>
         )}
 
         {/* WhatsApp */}
@@ -155,6 +157,7 @@ function DonationCard({ foundation }: { foundation: Foundation }) {
 export default function DonatePage() {
   const { foundations, loading, error } = useFoundations()
   const [searchTerm, setSearchTerm] = useState("")
+  const [donateFoundation, setDonateFoundation] = useState<Foundation | null>(null)
 
   // Filtrar solo fundaciones verificadas con canales de donación
   const verifiedFoundations = foundations.filter(f => 
@@ -287,7 +290,11 @@ export default function DonatePage() {
                     className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
                   >
                     {verifiedFoundations.map((foundation) => (
-                      <DonationCard key={foundation.id} foundation={foundation} />
+                      <DonationCard
+                        key={foundation.id}
+                        foundation={foundation}
+                        onDonate={() => setDonateFoundation(foundation)}
+                      />
                     ))}
                   </motion.div>
                 </>
@@ -309,6 +316,13 @@ export default function DonatePage() {
               )}
             </>
           )}
+        </div>
+      </section>
+
+      {/* Rankings de top donadores */}
+      <section className="py-16 bg-gradient-to-b from-white to-pink-50/40">
+        <div className="container mx-auto px-4">
+          <TopDonors />
         </div>
       </section>
 
@@ -416,6 +430,13 @@ export default function DonatePage() {
           </motion.div>
         </div>
       </section>
+
+      {/* Modal de donación */}
+      <DonationModal
+        foundation={donateFoundation}
+        isOpen={donateFoundation !== null}
+        onClose={() => setDonateFoundation(null)}
+      />
     </div>
   )
 }

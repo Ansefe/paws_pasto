@@ -22,6 +22,7 @@ export function SiteConfigProvider({ children }: { children: ReactNode }) {
   )
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useSiteConfigContext() {
   const context = useContext(SiteConfigContext)
   if (context === undefined) {

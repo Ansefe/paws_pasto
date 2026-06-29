@@ -34,6 +34,7 @@ interface FoundationDetail extends Foundation {
 function adaptPetForModal(pet: PetWithFoundation) {
   return {
     id: pet.id,
+    foundationId: pet.foundation.id,
     name: pet.name,
     species: pet.species,
     breed: pet.breed ?? undefined,

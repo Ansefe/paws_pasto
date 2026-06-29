@@ -1,9 +1,9 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { 
-  X, 
-  Heart, 
-  ChevronLeft, 
+import {
+  X,
+  Heart,
+  ChevronLeft,
   ChevronRight,
   MapPin,
   Calendar,
@@ -13,7 +13,8 @@ import {
   MessageCircle,
   Shield,
   Sparkles,
-  Check
+  Check,
+  Share2
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -21,8 +22,10 @@ import {
   DialogContent,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { supabase } from "@/lib/supabase"
 import { sendAdoptionInterestNotification } from "@/lib/telegram"
+import { useFavorites } from "@/hooks/useFavorites"
+import { useAuth } from "@/contexts/AuthContext"
+import { ClaimAdoptionModal } from "@/components/ClaimAdoptionModal"
 
 // Construye una URL de WhatsApp (wa.me) a partir de un número y un mensaje.
 // Normaliza el número a dígitos y antepone el código de Colombia (57) si falta.
@@ -37,6 +40,7 @@ function buildWhatsappUrl(rawNumber: string, message: string): string {
 // Tipo de mascota (simplificado para el modal)
 export interface PetForModal {
   id: string
+  foundationId: string
   name: string
   species: "dog" | "cat"
   breed?: string
@@ -97,9 +101,49 @@ interface PetDetailModalProps {
 
 export function PetDetailModal({ pet, isOpen, onClose }: PetDetailModalProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
-  const [isFavorite, setIsFavorite] = useState(false)
+  const [copied, setCopied] = useState(false)
+  const [showClaim, setShowClaim] = useState(false)
+  const { isFavorite, toggleFavorite } = useFavorites()
+  const { user } = useAuth()
+
+  // Título dinámico de la pestaña mientras el modal está abierto (para compartir).
+  useEffect(() => {
+    if (!isOpen || !pet) return
+    const prev = document.title
+    document.title = `${pet.name} en adopción · Paws Pasto`
+    return () => {
+      document.title = prev
+    }
+  }, [isOpen, pet])
 
   if (!pet) return null
+
+  // Compartir mascota: Web Share API nativo con fallback a copiar el enlace.
+  const handleShare = async () => {
+    const url = `${window.location.origin}/adoptar?pet=${pet.id}`
+    const shareData = {
+      title: `${pet.name} en adopción`,
+      text: `Conoce a ${pet.name} en Paws Pasto 🐾`,
+      url,
+    }
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData)
+        return
+      }
+    } catch {
+      // El usuario canceló el diálogo nativo; no hacemos nada.
+      return
+    }
+    try {
+      await navigator.clipboard.writeText(url)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      // Sin clipboard disponible: último recurso.
+      window.prompt("Copia el enlace para compartir:", url)
+    }
+  }
 
   const emoji = petEmojis[pet.species][pet.gender]
   
@@ -118,8 +162,9 @@ export function PetDetailModal({ pet, isOpen, onClose }: PetDetailModalProps) {
     setCurrentImageIndex((prev) => (prev - 1 + allImages.length) % allImages.length)
   }
 
-  // Flujo de postulación: abre WhatsApp con la fundación, notifica por Telegram
-  // y marca la mascota "en proceso" (sin bloquear nuevas postulaciones).
+  // Flujo de postulación: abre WhatsApp con la fundación y notifica por Telegram.
+  // El estado de la mascota (in_process / adopted) lo gestiona la fundación o el
+  // admin manualmente; ya no se cambia desde el público.
   const handleAdopt = () => {
     if (!pet) return
 
@@ -140,9 +185,6 @@ export function PetDetailModal({ pet, isOpen, onClose }: PetDetailModalProps) {
       foundationName: pet.foundation.name,
       foundationWhatsapp: whatsapp,
     })
-
-    // 3. Marcar la mascota "en proceso" (best-effort; no bloquea otras postulaciones)
-    void supabase.rpc("mark_pet_in_process", { pet_id: pet.id })
   }
 
   // Características de la mascota
@@ -155,7 +197,11 @@ export function PetDetailModal({ pet, isOpen, onClose }: PetDetailModalProps) {
   ].filter(Boolean)
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <>
+    {/* Ocultamos el Dialog mientras se muestra el modal de reclamo para que radix
+        no lo deje inerte (el reclamo es un overlay aparte). No propagamos onClose
+        cuando el cierre se debe a abrir el reclamo. */}
+    <Dialog open={isOpen && !showClaim} onOpenChange={(open) => { if (!open && !showClaim) onClose() }}>
       <DialogContent className="max-w-5xl p-0 overflow-hidden bg-white rounded-3xl max-h-[90vh] overflow-y-auto">
         <DialogTitle className="sr-only">Detalles de {pet.name}</DialogTitle>
         
@@ -217,23 +263,36 @@ export function PetDetailModal({ pet, isOpen, onClose }: PetDetailModalProps) {
               </>
             )}
 
-            {/* Botón favorito */}
+            {/* Botones de acción: compartir + favorito */}
+            <div className="absolute top-4 left-4 flex gap-2">
+              <button
+                onClick={handleShare}
+                title={copied ? "¡Enlace copiado!" : "Compartir"}
+                className="w-12 h-12 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-all"
+              >
+                {copied ? (
+                  <Check className="w-6 h-6 text-emerald-500" />
+                ) : (
+                  <Share2 className="w-6 h-6 text-gray-500" />
+                )}
+              </button>
+            </div>
             <button
-              onClick={() => setIsFavorite(!isFavorite)}
+              onClick={() => toggleFavorite(pet.id)}
               className="absolute top-4 right-4 w-12 h-12 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-all"
             >
-              <Heart 
+              <Heart
                 className={`w-6 h-6 transition-colors ${
-                  isFavorite 
-                    ? "text-pink-500 fill-pink-500" 
+                  isFavorite(pet.id)
+                    ? "text-pink-500 fill-pink-500"
                     : "text-gray-400"
-                }`} 
+                }`}
               />
             </button>
 
             {/* Badge de estado */}
             {pet.status === "in_process" && (
-              <div className="absolute top-4 left-4 bg-amber-500 text-white text-sm font-medium px-4 py-2 rounded-full">
+              <div className="absolute top-20 left-4 bg-amber-500 text-white text-sm font-medium px-4 py-2 rounded-full">
                 🤝 Ya estoy conociendo a alguien
               </div>
             )}
@@ -385,6 +444,17 @@ export function PetDetailModal({ pet, isOpen, onClose }: PetDetailModalProps) {
                       Esta fundación aún no tiene WhatsApp configurado; igual avisaremos a nuestro equipo.
                     </p>
                   )}
+
+                  {/* Registrar adopción (solo con sesión iniciada) */}
+                  {user && (
+                    <button
+                      onClick={() => setShowClaim(true)}
+                      className="w-full text-sm font-medium text-pink-600 hover:text-pink-700 hover:bg-pink-50 rounded-xl py-2.5 transition-colors flex items-center justify-center gap-2"
+                    >
+                      <Heart className="w-4 h-4" />
+                      ¿Ya lo adoptaste? Cuéntanoslo
+                    </button>
+                  )}
                 </>
               )}
             </div>
@@ -400,5 +470,17 @@ export function PetDetailModal({ pet, isOpen, onClose }: PetDetailModalProps) {
         </button>
       </DialogContent>
     </Dialog>
+
+    {/* Modal para registrar la adopción (solo con sesión) */}
+    {showClaim && (
+      <ClaimAdoptionModal
+        petId={pet.id}
+        foundationId={pet.foundationId}
+        petName={pet.name}
+        isOpen={showClaim}
+        onClose={() => setShowClaim(false)}
+      />
+    )}
+    </>
   )
 }

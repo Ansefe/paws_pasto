@@ -3,6 +3,7 @@ import { Link } from "react-router-dom"
 import { Heart, Home, Users, Search, ArrowRight, Sparkles, PawPrint, Loader2 } from "lucide-react"
 import { motion } from "framer-motion"
 import { useFeaturedPets } from "@/hooks/usePets"
+import { useFavorites } from "@/hooks/useFavorites"
 
 const fadeInUp = {
   initial: { opacity: 0, y: 60 },
@@ -42,6 +43,7 @@ const pawPositions = [
 
 export function HomePage() {
   const { pets: featuredPets, loading: petsLoading } = useFeaturedPets(4)
+  const { isFavorite, toggleFavorite } = useFavorites()
 
   return (
     <div className="flex flex-col overflow-hidden">
@@ -247,9 +249,9 @@ export function HomePage() {
                 transition={{ delay: 1 }}
               >
                 {[
-                  { number: "500+", label: "Adoptados" },
-                  { number: "25+", label: "Fundaciones" },
-                  { number: "1.2k", label: "Familias felices" },
+                  { number: "12", label: "Adoptados" },
+                  { number: "2", label: "Fundaciones aliadas" },
+                  { number: "10", label: "Familias felices" },
                 ].map((stat, i) => (
                   <div key={i} className="text-center">
                     <div className="text-3xl md:text-4xl font-bold text-white">{stat.number}</div>
@@ -414,11 +416,21 @@ export function HomePage() {
                               {pet.age_approx ? ` • ${pet.age_approx}` : ''}
                             </p>
                           </div>
-                          <button 
+                          <button
                             className="p-2 rounded-full hover:bg-pink-50 transition-colors group/heart"
-                            onClick={(e) => e.preventDefault()}
+                            onClick={(e) => {
+                              e.preventDefault()
+                              e.stopPropagation()
+                              toggleFavorite(pet.id)
+                            }}
                           >
-                            <Heart className="w-5 h-5 text-gray-400 group-hover/heart:text-pink-500 group-hover/heart:fill-pink-500 transition-colors" />
+                            <Heart
+                              className={`w-5 h-5 transition-colors ${
+                                isFavorite(pet.id)
+                                  ? "text-pink-500 fill-pink-500"
+                                  : "text-gray-400 group-hover/heart:text-pink-500 group-hover/heart:fill-pink-500"
+                              }`}
+                            />
                           </button>
                         </div>
                       </div>

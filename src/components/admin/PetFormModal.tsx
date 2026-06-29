@@ -22,6 +22,7 @@ interface PetFormModalProps {
   isOpen: boolean
   onClose: () => void
   onSaved: () => void
+  lockedFoundationId?: string // si se pasa, fija la fundación y oculta el selector (panel fundación)
 }
 
 interface PetFormState {
@@ -62,7 +63,7 @@ const emptyForm: PetFormState = {
   main_photo_url: "",
 }
 
-export function PetFormModal({ pet, isOpen, onClose, onSaved }: PetFormModalProps) {
+export function PetFormModal({ pet, isOpen, onClose, onSaved, lockedFoundationId }: PetFormModalProps) {
   const isEdit = !!pet
   const { foundations, loading: loadingFoundations } = useFoundations(false)
 
@@ -96,9 +97,9 @@ export function PetFormModal({ pet, isOpen, onClose, onSaved }: PetFormModalProp
         main_photo_url: pet.main_photo_url || "",
       })
     } else {
-      setForm(emptyForm)
+      setForm({ ...emptyForm, foundation_id: lockedFoundationId ?? "" })
     }
-  }, [pet, isOpen])
+  }, [pet, isOpen, lockedFoundationId])
 
   const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -249,7 +250,7 @@ export function PetFormModal({ pet, isOpen, onClose, onSaved }: PetFormModalProp
           </div>
 
           {/* Nombre + Fundación */}
-          <div className="grid sm:grid-cols-2 gap-4">
+          <div className={`grid gap-4 ${lockedFoundationId ? "" : "sm:grid-cols-2"}`}>
             <div className="space-y-2">
               <Label htmlFor="pet-name" className="text-sm font-medium text-gray-700">Nombre *</Label>
               <Input
@@ -262,25 +263,27 @@ export function PetFormModal({ pet, isOpen, onClose, onSaved }: PetFormModalProp
                 className="rounded-xl"
               />
             </div>
-            <div className="space-y-2">
-              <Label className="text-sm font-medium text-gray-700">Fundación *</Label>
-              <Select
-                value={form.foundation_id}
-                onValueChange={(value) => setForm({ ...form, foundation_id: value })}
-                disabled={busy || loadingFoundations}
-              >
-                <SelectTrigger className="rounded-xl">
-                  <SelectValue placeholder={loadingFoundations ? "Cargando..." : "Selecciona fundación"} />
-                </SelectTrigger>
-                <SelectContent>
-                  {foundations.map((f) => (
-                    <SelectItem key={f.id} value={f.id}>
-                      {f.foundation_name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            {!lockedFoundationId && (
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-gray-700">Fundación *</Label>
+                <Select
+                  value={form.foundation_id}
+                  onValueChange={(value) => setForm({ ...form, foundation_id: value })}
+                  disabled={busy || loadingFoundations}
+                >
+                  <SelectTrigger className="rounded-xl">
+                    <SelectValue placeholder={loadingFoundations ? "Cargando..." : "Selecciona fundación"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {foundations.map((f) => (
+                      <SelectItem key={f.id} value={f.id}>
+                        {f.foundation_name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </div>
 
           {/* Especie + Raza */}

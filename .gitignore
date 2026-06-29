@@ -22,4 +22,16 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Variables de entorno y secretos (no subir; .env.example sí se versiona)
 .env
+.env.*
+!.env.example
+
+# Configuración local de MCP / herramientas (puede exponer infraestructura)
+.mcp.json
+
+# Supabase local
+supabase/.branches
+supabase/.temp
+.supabase

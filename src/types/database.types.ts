@@ -17,6 +17,9 @@ export type PetSize = 'small' | 'medium' | 'large'
 export type PetStatus = 'available' | 'in_process' | 'adopted' | 'paused'
 export type AdoptionStatus = 'pending' | 'approved' | 'rejected' | 'cancelled'
 export type ApplicantType = 'foundation' | 'rescuer'
+export type DonationStatus = 'reported' | 'confirmed' | 'rejected'
+export type ClaimStatus = 'pending' | 'confirmed' | 'rejected'
+export type ClaimInitiator = 'adopter' | 'foundation'
 export type ApplicationStatus = 'pending' | 'approved' | 'rejected'
 
 export interface Database {
@@ -360,6 +363,124 @@ export interface Database {
         }
         Relationships: []
       }
+      donation_reports: {
+        Row: {
+          id: string
+          foundation_id: string
+          profile_id: string | null
+          reporter_name: string | null
+          amount_cop: number
+          note: string | null
+          status: DonationStatus
+          reviewed_by: string | null
+          reviewed_at: string | null
+          review_notes: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          foundation_id: string
+          profile_id?: string | null
+          reporter_name?: string | null
+          amount_cop: number
+          note?: string | null
+          status?: DonationStatus
+          reviewed_by?: string | null
+          reviewed_at?: string | null
+          review_notes?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          foundation_id?: string
+          profile_id?: string | null
+          reporter_name?: string | null
+          amount_cop?: number
+          note?: string | null
+          status?: DonationStatus
+          reviewed_by?: string | null
+          reviewed_at?: string | null
+          review_notes?: string | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "donation_reports_foundation_id_fkey"
+            columns: ["foundation_id"]
+            isOneToOne: false
+            referencedRelation: "foundations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "donation_reports_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      adoption_claims: {
+        Row: {
+          id: string
+          pet_id: string
+          profile_id: string
+          foundation_id: string
+          status: ClaimStatus
+          story: string | null
+          photo_urls: string[]
+          initiated_by: ClaimInitiator
+          confirmed_at: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          pet_id: string
+          profile_id: string
+          foundation_id: string
+          status?: ClaimStatus
+          story?: string | null
+          photo_urls?: string[]
+          initiated_by: ClaimInitiator
+          confirmed_at?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          pet_id?: string
+          profile_id?: string
+          foundation_id?: string
+          status?: ClaimStatus
+          story?: string | null
+          photo_urls?: string[]
+          initiated_by?: ClaimInitiator
+          confirmed_at?: string | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "adoption_claims_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
+            referencedRelation: "pets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "adoption_claims_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "adoption_claims_foundation_id_fkey"
+            columns: ["foundation_id"]
+            isOneToOne: false
+            referencedRelation: "foundations"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       site_settings: {
         Row: {
           id: string
@@ -393,9 +514,14 @@ export interface Database {
         Args: { target_user_id: string }
         Returns: undefined
       }
-      mark_pet_in_process: {
-        Args: { pet_id: string }
-        Returns: undefined
+      top_donors: {
+        Args: { period?: string; max_rows?: number }
+        Returns: {
+          profile_id: string
+          display_name: string
+          total_cop: number
+          donations: number
+        }[]
       }
     }
     Enums: {
@@ -424,6 +550,23 @@ export type Favorite = Database['public']['Tables']['favorites']['Row']
 export type Adoption = Database['public']['Tables']['adoptions']['Row']
 export type Application = Database['public']['Tables']['applications']['Row']
 export type ApplicationInsert = Database['public']['Tables']['applications']['Insert']
+export type DonationReport = Database['public']['Tables']['donation_reports']['Row']
+export type DonationReportInsert = Database['public']['Tables']['donation_reports']['Insert']
+export type AdoptionClaim = Database['public']['Tables']['adoption_claims']['Row']
+export type AdoptionClaimInsert = Database['public']['Tables']['adoption_claims']['Insert']
+
+// Donación con datos de la fundación (para listados admin/fundación)
+export type DonationReportWithFoundation = DonationReport & {
+  foundation: Pick<Foundation, 'id' | 'foundation_name'> | null
+}
+
+// Fila de ranking de top donadores (RPC top_donors)
+export type TopDonor = {
+  profile_id: string
+  display_name: string
+  total_cop: number
+  donations: number
+}
 
 // Adopción con datos relacionados (mascota, adoptante, fundación)
 export type AdoptionWithRelations = Adoption & {

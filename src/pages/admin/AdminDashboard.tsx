@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom"
 import { motion } from "framer-motion"
 import {
   LayoutDashboard, Users, Building2, PawPrint, Settings,
-  Inbox, ChevronRight, LogOut, Menu, X
+  Inbox, HandHeart, Heart, ChevronRight, LogOut, Menu, X
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useAuth } from "@/contexts/AuthContext"
@@ -14,9 +14,11 @@ import { AdminUsers } from "./sections/AdminUsers"
 import { AdminFoundations } from "./sections/AdminFoundations"
 import { AdminPets } from "./sections/AdminPets"
 import { AdminApplications } from "./sections/AdminApplications"
+import { AdminDonations } from "./sections/AdminDonations"
+import { AdminClaims } from "./sections/AdminClaims"
 import { AdminSettings } from "./sections/AdminSettings"
 
-type AdminSection = "overview" | "users" | "foundations" | "pets" | "applications" | "settings"
+type AdminSection = "overview" | "users" | "foundations" | "pets" | "applications" | "donations" | "claims" | "settings"
 
 const menuItems = [
   { id: "overview" as const, label: "Dashboard", icon: LayoutDashboard },
@@ -24,6 +26,8 @@ const menuItems = [
   { id: "foundations" as const, label: "Fundaciones", icon: Building2 },
   { id: "pets" as const, label: "Mascotas", icon: PawPrint },
   { id: "applications" as const, label: "Solicitudes", icon: Inbox },
+  { id: "donations" as const, label: "Donaciones", icon: HandHeart },
+  { id: "claims" as const, label: "Reclamos", icon: Heart },
   { id: "settings" as const, label: "Configuración", icon: Settings },
 ]
 
@@ -56,6 +60,10 @@ export default function AdminDashboard() {
         return <AdminPets />
       case "applications":
         return <AdminApplications />
+      case "donations":
+        return <AdminDonations />
+      case "claims":
+        return <AdminClaims />
       case "settings":
         return <AdminSettings />
       default:

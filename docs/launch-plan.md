@@ -212,139 +212,158 @@ Notificaciones que **sí** tienen sentido:
 
 ---
 
-### Fase 0 — Verificación de infraestructura (1–2 días)
+### Fase 0 — Verificación de infraestructura — ✅ COMPLETADA (2026-06-28)
 
 **Objetivo:** saber con certeza qué hay en Supabase y dejar staging funcional.
 
-- [ ] Ejecutar checklist SQL del §1 contra el proyecto real
-- [ ] Documentar resultado en `docs/supabase-status.md` (tablas, RPCs, buckets, políticas)
-- [ ] Aplicar scripts faltantes: `create_applications_table.sql`, `admin_rls_policies.sql`, `fix_rls_policies.sql`, trigger de perfiles
-- [ ] **No aplicar** `mark_pet_in_process.sql` en entornos nuevos; planificar DROP en existentes
-- [ ] Cargar datos piloto: 2 fundaciones, ~10 mascotas, 1 admin
-- [ ] `npm install && npm run build && npm run lint`
-- [ ] Actualizar `README.md` raíz (sustituir template Vite)
+- [x] Ejecutar checklist SQL del §1 contra el proyecto real (vía MCP)
+- [x] Documentar resultado en **`docs/supabase-status.md`**
+- [x] `delete_user_complete` creada (corrido `apply_fase0.sql`) ✔ verificado en BD
+- [x] `mark_pet_in_process` eliminada de la BD ✔ verificado
+- [x] Datos piloto cargados: **4 fundaciones, 12 mascotas (11 disponibles), 1 admin, 1 postulación, 4 adopciones** ✔
+- [x] `npm run build && npm run lint` — pasan limpios
+- [ ] Actualizar `README.md` raíz (sustituir template Vite) — pendiente menor
 
-**Criterio:** admin puede CRUD mascotas/fundaciones; catálogo público muestra datos reales.
+**Criterio:** ✅ infraestructura y datos reales presentes; admin puede operar; catálogo público muestra datos reales.
 
 ---
 
-### Fase 1 — Quick wins de producto (3–5 días)
+### Fase 1 — Quick wins de producto — ✅ COMPLETADA (frontend) (2026-06-28)
 
 **Objetivo:** cambios acordados de bajo riesgo en el sitio público.
 
 #### 1.1 Eliminar `mark_pet_in_process`
-- [ ] Quitar llamada RPC en `PetDetailModal.tsx`
-- [ ] Script SQL para DROP en Supabase si ya existía
-- [ ] Revisar copy del modal (“en proceso” solo refleja lo que ponga admin/fundación)
+- [x] Quitar llamada RPC en `PetDetailModal.tsx` (+ import `supabase` sin uso)
+- [ ] 🔒 Script SQL para DROP en Supabase (requiere escritura — ver Fase 0)
+- [x] Copy del modal ya refleja solo lo que pone admin/fundación
 
 #### 1.2 Stats realistas en Home
-- [ ] Cambiar a: 12 adoptados · 2 fundaciones · 10 familias felices (o labels acordados)
+- [x] `Home.tsx`: 12 Adoptados · 2 Fundaciones aliadas · 10 Familias felices
 
 #### 1.3 Favoritos en localStorage
-- [ ] Hook `useFavoritePets()` sobre `useLocalStorage<string[]>` (IDs de mascotas)
-- [ ] Conectar corazón en tarjetas y modal (sin login)
-- [ ] Página o drawer `/favoritos` leyendo IDs + fetch de mascotas
-- [ ] Botón “Mis Favoritos” en header móvil/desktop
+- [x] Hook **`useFavorites`** (`useSyncExternalStore` → sincroniza en vivo entre tarjetas/modal/header)
+- [x] Corazón conectado en tarjetas (`Adopt`, `Home`) y modal (sin login)
+- [x] Página **`/favoritos`** (`FavoritesPage`) leyendo IDs + fetch de mascotas
+- [x] Botón "Mis Favoritos" con contador en header desktop y móvil
 
 #### 1.4 Compartir mascota
-- [ ] Leer `?pet=` en `AdoptPage` → abrir modal
-- [ ] Botón compartir (Web Share API + fallback copiar URL)
-- [ ] Actualizar `document.title` al abrir modal
+- [x] `AdoptPage` lee `?pet=` → abre modal (vía `usePet`, derivado sin efecto)
+- [x] Botón compartir en modal (Web Share API + fallback copiar URL)
+- [x] `document.title` dinámico al abrir modal + meta tags OG básicos en `index.html` (`lang="es"`)
 
-**Criterio:** favoritos persisten al recargar; link compartido abre la mascota; stats muestran valores realistas; nadie puede marcar “en proceso” desde el público.
+**Criterio:** ✅ favoritos persisten al recargar; link compartido abre la mascota; stats realistas; el público ya no marca "en proceso". Build + lint limpios.
 
 ---
 
-### Fase 2 — Donaciones reportadas + rankings (1 semana)
+### Fase 2 — Donaciones reportadas + rankings — ✅ COMPLETADA (2026-06-28)
 
 **Objetivo:** registrar intención de donación y habilitar top donadores.
 
-#### 2.1 Base de datos
-- [ ] Migración `donation_reports` + enum `donation_status`
-- [ ] RLS: insert público (anon + auth); lectura propia si autenticado; gestión admin + fundación dueña
-- [ ] Índices por `foundation_id`, `profile_id`, `status`, `created_at`
+> ⚠️ Requiere correr **`supabase/create_donation_reports_table.sql`** en el SQL Editor para que funcione (tabla + enum + RLS + RPC `top_donors`).
 
-#### 2.2 UX en `/donar`
-- [ ] Modal intermedio antes de link de pago / WhatsApp: monto (COP) + nota
-- [ ] CTA “Continuar a donar” → insert `reported` → abrir enlace externo
-- [ ] Invitación suave a registrarse: “¿Quieres aparecer en top donadores? Crea tu cuenta”
-- [ ] Si autenticado, vincular `profile_id` automáticamente
+#### 2.1 Base de datos — ✅ (script listo para correr)
+- [x] Migración `donation_reports` + enum `donation_status` → `supabase/create_donation_reports_table.sql`
+- [x] RLS: insert público (no falsifica `profile_id`); lectura propia/fundación/admin; update admin+fundación
+- [x] Índices por `foundation_id`, `profile_id`, `status`, `created_at`
+- [x] RPC `top_donors(period, max_rows)` SECURITY DEFINER para rankings públicos
 
-#### 2.3 Rankings
-- [ ] Sección en `/donar` o `/nosotros`: tabs “Del mes” / “Histórico”
-- [ ] Query: suma de montos `confirmed` agrupados por `profile_id`
-- [ ] Mostrar nombre público del perfil (campo `display_name` o `full_name`)
+#### 2.2 UX en `/donar` — ✅
+- [x] Modal intermedio (`DonationModal`): monto (COP, con chips rápidos) + nota
+- [x] CTA "Continuar a donar" → insert `reported` → abrir enlace oficial / WhatsApp
+- [x] Invitación suave a registrarse; nombre opcional para anónimos
+- [x] Si autenticado, vincula `profile_id` automáticamente
 
-#### 2.4 Panel admin
-- [ ] Sección “Donaciones”: listar `reported` / `confirmed` / `rejected`
-- [ ] Acciones: confirmar, rechazar (con notas)
-- [ ] Métricas: total reportado vs confirmado del mes
+#### 2.3 Rankings — ✅
+- [x] Componente `TopDonors` en `/donar`: tabs "Este mes" / "Histórico"
+- [x] Suma de `confirmed` por `profile_id` vía RPC `top_donors`
+- [x] Muestra `full_name` (o "Anónimo")
 
-**Criterio:** flujo donación registra intención; admin confirma manualmente; ranking solo muestra confirmadas.
+#### 2.4 Panel admin — ✅
+- [x] Sección "Donaciones" (`AdminDonations`): listar `reported` / `confirmed` / `rejected` + filtros
+- [x] Acciones: confirmar, rechazar (con notas); registra `reviewed_by` / `reviewed_at`
+- [x] Métricas: reportado pendiente + confirmado del mes + total registros
+- [x] Agregada al menú del `AdminDashboard`
+
+**Criterio:** ✅ flujo donación registra intención; admin confirma/rechaza; ranking solo muestra confirmadas. Build + lint limpios. Funciona end-to-end al correr `create_donation_reports_table.sql`.
 
 ---
 
-### Fase 3 — Registro adoptante + reclamos de adopción (1–1.5 semanas)
+### Fase 3 — Registro adoptante + reclamos de adopción — ✅ COMPLETADA (frontend) (2026-06-28)
 
 **Objetivo:** usuarios registrados presumir adopciones; fundación valida.
 
-#### 3.1 Registro / login adoptante (sin fricción forzada)
-- [ ] Registro simple: email, password, nombre, foto opcional
-- [ ] Header: si hay sesión adoptante → avatar, “Mi perfil”, logout
-- [ ] No redirigir adoptantes al admin
+> ⚠️ Requiere correr **`supabase/create_adoption_claims_table.sql`** (tabla + enum + RLS + trigger confirmar→adopted).
 
-#### 3.2 Tabla `adoption_claims`
-- [ ] Migración + RLS (adoptante crea/edita propio pending; fundación gestiona de su fundación; admin todo)
-- [ ] Subida de fotos a Storage
+#### 3.1 Registro / login adoptante — ✅
+- [x] Registro simple en `LoginModal` (toggle login/registro: nombre, email, password)
+- [x] Header con sesión: avatar + menú (Mi perfil, Favoritos, Cerrar sesión; Panel si admin) — desktop y móvil
+- [x] Adoptantes NO se redirigen al admin (solo admins van a `/admin`)
 
-#### 3.3 Flujo adoptante
-- [ ] Desde modal o perfil: “¡Adopté a [nombre]!” → formulario + fotos
-- [ ] Estado `pending` hasta validación
-- [ ] Perfil `/perfil` o `/mi-cuenta`: adopciones confirmadas, donaciones, stats
+#### 3.2 Tabla `adoption_claims` — ✅ (script listo para correr)
+- [x] Migración + RLS (adoptante crea/edita propio pending; fundación gestiona la suya; admin todo)
+- [x] Trigger: al confirmar → mascota pasa a `adopted` (+ `adopted_at`)
+- [ ] Subida de fotos a Storage (en flujo adoptante 3.3)
 
-#### 3.4 Flujo fundación (parcial — completa en Fase 4)
-- [ ] Ver reclamos pendientes
-- [ ] Confirmar → pet `adopted` + claim `confirmed`
-- [ ] Rechazar con motivo
-- [ ] Asignar adoptante a mascota (iniciativa fundación)
+#### 3.3 Flujo adoptante — ✅
+- [x] Desde el modal de mascota (con sesión): "¿Ya lo adoptaste?" → `ClaimAdoptionModal` con historia + fotos
+- [x] Subida de fotos a Storage (`images/adoptions/{userId}/...`)
+- [x] Estado `pending` hasta validación
+- [x] Perfil `/perfil` (`ProfilePage`): vitrina con adopciones + donaciones + stats
 
-**Criterio:** adoptante reclama adopción; fundación confirma; mascota pasa a adoptada; perfil muestra vitrina.
+#### 3.4 Gestión de reclamos — ✅ (vía admin; panel de fundación llega en Fase 4)
+- [x] Sección admin "Reclamos" (`AdminClaims`): listar + filtros + ver historia/fotos
+- [x] Confirmar → trigger marca la mascota `adopted`; Rechazar
+- [ ] Asignar adoptante desde la fundación (iniciativa fundación) → Fase 4
+
+**Criterio:** ✅ adoptante reclama adopción; admin confirma → mascota adoptada; perfil muestra vitrina. Build limpio. **Probado end-to-end en navegador (2026-06-28).**
+
+> 🐛 Bug encontrado y corregido en pruebas: el modal de reclamo quedaba inerte por el focus-trap del `Dialog` de radix (el reclamo es un overlay hermano). Fix: el `Dialog` de la mascota se cierra mientras se muestra el reclamo (`open={isOpen && !showClaim}`).
 
 ---
 
-### Fase 4 — Panel self-service fundaciones (1.5–2 semanas)
+### Fase 4 — Panel self-service fundaciones — ✅ COMPLETADA (2026-06-29)
 
 **Objetivo:** fundaciones gestionan su operación sin depender del admin.
 
-- [ ] Ruta `/fundacion/*` + `ProtectedRoute requiredRole="foundation"`
-- [ ] Dashboard: resumen mascotas, reclamos pendientes, donaciones reportadas
-- [ ] CRUD mascotas propias (reutilizar/adaptar `PetFormModal`)
-- [ ] Cambio de estado de mascotas
-- [ ] Gestión completa de `adoption_claims`
-- [ ] Gestión de `donation_reports` (confirmar / rechazar)
-- [ ] Edición de perfil de fundación
-- [ ] RLS: fundación solo ve/edita filas donde `foundation.profile_id = auth.uid()`
+- [x] Ruta `/fundacion/*` + `ProtectedRoute requiredRole="foundation"`
+- [x] Dashboard: resumen mascotas + reclamos/donaciones pendientes (con badges en el menú)
+- [x] CRUD mascotas propias (`PetFormModal` con `lockedFoundationId`) — **probado en vivo (crear/editar/borrar)**
+- [x] Cambio de estado de mascotas (selector en el form)
+- [x] Gestión de `adoption_claims` (confirmar → mascota `adopted` vía trigger / rechazar)
+- [x] Gestión de `donation_reports` (confirmar / rechazar)
+- [x] Edición de perfil de fundación (`FoundationFormModal` con `selfEdit`: oculta "verificada" y selector de dueño) — **probado en vivo**
+- [x] RLS: verificada — la fundación solo ve/edita sus filas (`foundation.profile_id = auth.uid()`)
 
-**Post-aprobación de `applications`:**
+> Hook `useMyFoundation`; panel `src/pages/foundation/FoundationDashboard.tsx`. Probado en navegador con cuenta empresa real (`Refugio Huellitas`). Build + lint limpios.
+> 🐛 Bug encontrado y corregido en pruebas: `pets.main_photo_url` era `NOT NULL` y el form permitía crear sin foto (400). Fix aplicado en BD (`drop not null`, coherente con los fallbacks de emoji en la UI).
+
+**Post-aprobación de `applications` (queda para Fase 5):**
 - [ ] Edge Function: crear usuario + fundación + email credenciales (mejora sobre flujo manual actual)
 
 **Criterio:** fundación verificada publica mascota, confirma adopción y revisa donación sin tocar admin.
 
 ---
 
-### Fase 5 — Seguridad e infra producción (1 semana)
+### Fase 5 — Seguridad e infra producción — 🟡 EN CURSO (2026-06-29)
 
 **Objetivo:** listo para tráfico real.
 
-- [ ] Edge Function para Telegram (eliminar `VITE_TELEGRAM_BOT_TOKEN` del cliente)
-- [ ] Edge Function `createUser` para admin (reemplazar `signUp` aislado)
-- [ ] Endurecer Storage RLS (escritura por rol/carpeta)
+**Hecho en código (build + lint limpios; lint de todo `src` ahora en 0 errores):**
+- [x] **Error boundary** (`src/components/ErrorBoundary.tsx`) envuelve la app + **404** (`src/pages/NotFound.tsx`, ruta `*`) — probado en navegador
+- [x] **SEO**: `lang="es"`, meta description, OG (hecho en Fase 1.4)
+- [x] **CI**: GitHub Actions `.github/workflows/ci.yml` (lint + build en push/PR a main)
+- [x] Limpieza de 4 errores de lint pre-existentes (ui/contexts)
+
+**Listo para que ejecutes (no requiere mi rewire previo):**
+- [x] 📦 Edge Function Telegram: `supabase/functions/notify-telegram/index.ts` → deploy + secrets, luego rewire del cliente (lo aplico tras el deploy para no romper notificaciones)
+- [x] 📦 Endurecer `is_verified` a nivel BD: `supabase/harden_is_verified.sql` (trigger: solo admin verifica)
+
+**Pendiente (requiere deploy / cuentas externas):**
+- [ ] Edge Function `admin-create-user` (service role) para reemplazar el `signUp` aislado del admin — la escribo cuando digas; el rewire de `AddUserModal` va después del deploy
+- [ ] Endurecer Storage RLS (escritura por rol/carpeta en bucket `images`)
 - [ ] Rate limit / honeypot en inserts públicos (`applications`, `donation_reports`)
-- [ ] CI: GitHub Actions (build + lint)
 - [ ] Deploy (Vercel/Netlify) + variables de entorno
-- [ ] SEO: `lang="es"`, meta description, OG estático mínimo
-- [ ] Error boundaries + 404
-- [ ] Sincronizar docs (`user-flows.md`, `database.md`, `api.md`) con decisiones de este plan
+- [ ] Sincronizar docs (`user-flows.md`, `database.md`, `api.md`)
 
 **Criterio:** token Telegram no visible en bundle; deploy automatizado; documentación al día.
 

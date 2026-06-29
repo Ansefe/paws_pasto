@@ -32,6 +32,7 @@ interface FoundationFormModalProps {
   onClose: () => void
   onSaved: () => void
   prefill?: FoundationPrefill // datos iniciales al crear (p. ej. desde una postulación)
+  selfEdit?: boolean // true = la fundación edita su propio perfil (oculta "verificada")
 }
 
 interface ProfileOption {
@@ -71,7 +72,7 @@ const emptyForm: FoundationFormState = {
   logo_url: "",
 }
 
-export function FoundationFormModal({ foundation, isOpen, onClose, onSaved, prefill }: FoundationFormModalProps) {
+export function FoundationFormModal({ foundation, isOpen, onClose, onSaved, prefill, selfEdit }: FoundationFormModalProps) {
   const isEdit = !!foundation
 
   const [form, setForm] = useState<FoundationFormState>(emptyForm)
@@ -428,17 +429,19 @@ export function FoundationFormModal({ foundation, isOpen, onClose, onSaved, pref
             </div>
           </div>
 
-          {/* Verificada */}
-          <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={form.is_verified}
-              onChange={(e) => setForm({ ...form, is_verified: e.target.checked })}
-              disabled={busy}
-              className="w-4 h-4 rounded border-gray-300 text-cyan-500 focus:ring-cyan-500"
-            />
-            Fundación verificada
-          </label>
+          {/* Verificada (solo admin; una fundación no puede auto-verificarse) */}
+          {!selfEdit && (
+            <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={form.is_verified}
+                onChange={(e) => setForm({ ...form, is_verified: e.target.checked })}
+                disabled={busy}
+                className="w-4 h-4 rounded border-gray-300 text-cyan-500 focus:ring-cyan-500"
+              />
+              Fundación verificada
+            </label>
+          )}
 
           {/* Error / Success */}
           {error && (

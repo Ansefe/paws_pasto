@@ -1,6 +1,6 @@
-import { Link, useLocation } from "react-router-dom"
+import { Link, useLocation, useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
-import { Menu, Heart, PawPrint } from "lucide-react"
+import { Menu, Heart, PawPrint, User, LogOut, LayoutDashboard } from "lucide-react"
 import {
   Sheet,
   SheetContent,
@@ -8,10 +8,19 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { motion } from "framer-motion"
 import { useState, useEffect } from "react"
 import { LoginModal } from "@/components/auth/LoginModal"
 import { ApplicationModal } from "@/components/auth/ApplicationModal"
+import { useFavorites } from "@/hooks/useFavorites"
+import { useAuth } from "@/contexts/AuthContext"
 
 const navLinks = [
   { to: "/", label: "Inicio" },
@@ -27,6 +36,19 @@ export function Header() {
   const [scrolled, setScrolled] = useState(false)
   const [showLoginModal, setShowLoginModal] = useState(false)
   const [showApplicationModal, setShowApplicationModal] = useState(false)
+  const { count: favoritesCount } = useFavorites()
+  const { user, profile, signOut } = useAuth()
+  const navigate = useNavigate()
+
+  const displayName = profile?.full_name || user?.email || "Mi cuenta"
+  const initial = (profile?.full_name?.charAt(0) || user?.email?.charAt(0) || "U").toUpperCase()
+  const isAdmin = profile?.role === "admin"
+  const isFoundation = profile?.role === "foundation"
+
+  const handleSignOut = async () => {
+    await signOut()
+    navigate("/")
+  }
 
   useEffect(() => {
     const handleScroll = () => {
@@ -96,23 +118,68 @@ export function Header() {
           </div>
           
           <div className="ml-4 flex items-center gap-2">
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               size="icon"
-              className={`rounded-full ${
-                isTransparent 
-                  ? "text-white hover:bg-white/20 [filter:_drop-shadow(0_1px_2px_rgb(0_0_0_/_50%))]" 
+              asChild
+              className={`relative rounded-full ${
+                isTransparent
+                  ? "text-white hover:bg-white/20 [filter:_drop-shadow(0_1px_2px_rgb(0_0_0_/_50%))]"
                   : "text-gray-600 hover:bg-gray-100"
               }`}
             >
-              <Heart className="h-5 w-5" />
+              <Link to="/favoritos" aria-label="Mis favoritos">
+                <Heart className="h-5 w-5" />
+                {favoritesCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 bg-pink-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                    {favoritesCount}
+                  </span>
+                )}
+              </Link>
             </Button>
-            <Button 
-              onClick={() => setShowLoginModal(true)}
-              className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-medium px-6 rounded-full shadow-lg shadow-cyan-500/25 hover:shadow-xl hover:shadow-cyan-500/30 transition-all"
-            >
-              Iniciar Sesión
-            </Button>
+            {user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 text-white font-bold flex items-center justify-center shadow-lg hover:scale-105 transition-transform">
+                    {initial}
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <div className="px-3 py-2">
+                    <p className="text-sm font-semibold text-gray-800 truncate">{displayName}</p>
+                    {user.email && <p className="text-xs text-gray-500 truncate">{user.email}</p>}
+                  </div>
+                  <DropdownMenuSeparator />
+                  {isAdmin && (
+                    <DropdownMenuItem className="gap-2 cursor-pointer" onClick={() => navigate("/admin")}>
+                      <LayoutDashboard className="w-4 h-4" /> Panel admin
+                    </DropdownMenuItem>
+                  )}
+                  {isFoundation && (
+                    <DropdownMenuItem className="gap-2 cursor-pointer" onClick={() => navigate("/fundacion")}>
+                      <LayoutDashboard className="w-4 h-4" /> Mi panel
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuItem className="gap-2 cursor-pointer" onClick={() => navigate("/perfil")}>
+                    <User className="w-4 h-4" /> Mi perfil
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="gap-2 cursor-pointer" onClick={() => navigate("/favoritos")}>
+                    <Heart className="w-4 h-4" /> Mis favoritos
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem className="gap-2 cursor-pointer text-red-600" onClick={handleSignOut}>
+                    <LogOut className="w-4 h-4" /> Cerrar sesión
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Button
+                onClick={() => setShowLoginModal(true)}
+                className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-medium px-6 rounded-full shadow-lg shadow-cyan-500/25 hover:shadow-xl hover:shadow-cyan-500/30 transition-all"
+              >
+                Iniciar Sesión
+              </Button>
+            )}
           </div>
         </nav>
 
@@ -149,19 +216,58 @@ export function Header() {
                 </Link>
               ))}
               <div className="border-t my-4" />
-              <Button 
+              <Button
                 variant="ghost"
+                asChild
                 className="justify-start gap-3 px-4 py-3 h-auto font-medium"
               >
-                <Heart className="h-5 w-5 text-pink-500" />
-                Mis Favoritos
+                <Link to="/favoritos">
+                  <Heart className="h-5 w-5 text-pink-500" />
+                  Mis Favoritos
+                  {favoritesCount > 0 && (
+                    <span className="ml-auto min-w-[20px] h-5 px-1.5 bg-pink-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
+                      {favoritesCount}
+                    </span>
+                  )}
+                </Link>
               </Button>
-              <Button 
-                onClick={() => setShowLoginModal(true)}
-                className="mt-4 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-medium rounded-xl h-12"
-              >
-                Iniciar Sesión
-              </Button>
+              {user ? (
+                <>
+                  {isAdmin && (
+                    <Button variant="ghost" asChild className="justify-start gap-3 px-4 py-3 h-auto font-medium">
+                      <Link to="/admin">
+                        <LayoutDashboard className="h-5 w-5 text-cyan-600" /> Panel admin
+                      </Link>
+                    </Button>
+                  )}
+                  {isFoundation && (
+                    <Button variant="ghost" asChild className="justify-start gap-3 px-4 py-3 h-auto font-medium">
+                      <Link to="/fundacion">
+                        <LayoutDashboard className="h-5 w-5 text-emerald-600" /> Mi panel
+                      </Link>
+                    </Button>
+                  )}
+                  <Button variant="ghost" asChild className="justify-start gap-3 px-4 py-3 h-auto font-medium">
+                    <Link to="/perfil">
+                      <User className="h-5 w-5 text-gray-600" /> Mi perfil
+                    </Link>
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    onClick={handleSignOut}
+                    className="justify-start gap-3 px-4 py-3 h-auto font-medium text-red-600 hover:bg-red-50"
+                  >
+                    <LogOut className="h-5 w-5" /> Cerrar sesión
+                  </Button>
+                </>
+              ) : (
+                <Button
+                  onClick={() => setShowLoginModal(true)}
+                  className="mt-4 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-medium rounded-xl h-12"
+                >
+                  Iniciar Sesión
+                </Button>
+              )}
             </nav>
           </SheetContent>
         </Sheet>

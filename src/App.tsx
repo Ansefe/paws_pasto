@@ -7,12 +7,17 @@ import { AboutPage } from '@/pages/About'
 import { AdoptPage } from '@/pages/Adopt'
 import { FoundationsPage } from '@/pages/Foundations'
 import { FoundationDetailPage } from '@/pages/FoundationDetail'
+import { FavoritesPage } from '@/pages/Favorites'
+import { ProfilePage } from '@/pages/Profile'
+import { NotFoundPage } from '@/pages/NotFound'
 import DonatePage from '@/pages/Donate'
 import AdminDashboard from '@/pages/admin/AdminDashboard'
+import { FoundationDashboard } from '@/pages/foundation/FoundationDashboard'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { SiteConfigProvider } from '@/contexts/SiteConfigContext'
 import { ToastProvider } from '@/contexts/ToastContext'
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
+import { ErrorBoundary } from '@/components/ErrorBoundary'
 
 // Layout para páginas públicas (con header y footer)
 function PublicLayout({ children }: { children: React.ReactNode }) {
@@ -30,17 +35,33 @@ function PublicLayout({ children }: { children: React.ReactNode }) {
 function AppContent() {
   const location = useLocation()
   const isAdminRoute = location.pathname.startsWith('/admin')
+  const isFoundationRoute = location.pathname.startsWith('/fundacion/') || location.pathname === '/fundacion'
 
   if (isAdminRoute) {
     return (
       <Routes>
-        <Route 
-          path="/admin/*" 
+        <Route
+          path="/admin/*"
           element={
             <ProtectedRoute requiredRole="admin">
               <AdminDashboard />
             </ProtectedRoute>
-          } 
+          }
+        />
+      </Routes>
+    )
+  }
+
+  if (isFoundationRoute) {
+    return (
+      <Routes>
+        <Route
+          path="/fundacion/*"
+          element={
+            <ProtectedRoute requiredRole="foundation">
+              <FoundationDashboard />
+            </ProtectedRoute>
+          }
         />
       </Routes>
     )
@@ -52,9 +73,12 @@ function AppContent() {
         <Route path="/" element={<HomePage />} />
         <Route path="/nosotros" element={<AboutPage />} />
         <Route path="/adoptar" element={<AdoptPage />} />
+        <Route path="/favoritos" element={<FavoritesPage />} />
+        <Route path="/perfil" element={<ProfilePage />} />
         <Route path="/fundaciones" element={<FoundationsPage />} />
         <Route path="/fundaciones/:id" element={<FoundationDetailPage />} />
         <Route path="/donar" element={<DonatePage />} />
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </PublicLayout>
   )
@@ -62,15 +86,17 @@ function AppContent() {
 
 function App() {
   return (
-    <Router>
-      <AuthProvider>
-        <SiteConfigProvider>
-          <ToastProvider>
-            <AppContent />
-          </ToastProvider>
-        </SiteConfigProvider>
-      </AuthProvider>
-    </Router>
+    <ErrorBoundary>
+      <Router>
+        <AuthProvider>
+          <SiteConfigProvider>
+            <ToastProvider>
+              <AppContent />
+            </ToastProvider>
+          </SiteConfigProvider>
+        </AuthProvider>
+      </Router>
+    </ErrorBoundary>
   )
 }
 
