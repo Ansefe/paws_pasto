@@ -371,12 +371,12 @@ Notificaciones que **sí** tienen sentido:
 
 ### Fase 6 — Crecimiento post-lanzamiento (continuo)
 
+- [x] **Galería múltiple en mascotas** (`gallery_urls`): subida en `PetFormModal` (admin + fundación); el modal ya las muestra en carrusel — UI verificada en navegador
+- [x] **Badges / gamificación en perfiles**: `/perfil` muestra logros derivados (Familia Paws, Donador, etc.)
 - [ ] OG dinámico por mascota (requiere SSR, Edge o servicio de meta tags)
-- [ ] Galería múltiple en mascotas (`gallery_urls`)
-- [ ] Badges y gamificación en perfiles
 - [ ] PWA / cache offline del catálogo
 - [ ] Analytics (Plausible/Umami)
-- [ ] Historias de adopción destacadas en Home
+- [ ] Historias de adopción destacadas en Home (requiere RPC público de claims `confirmed`)
 - [ ] Paginación server-side si el volumen crece
 
 ---

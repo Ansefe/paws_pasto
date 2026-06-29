@@ -82,6 +82,12 @@ export function ProfilePage() {
   const totalDonated = donations.filter((d) => d.status === "confirmed").reduce((s, d) => s + d.amount_cop, 0)
   const initial = (profile?.full_name?.charAt(0) || user.email?.charAt(0) || "U").toUpperCase()
 
+  const badges: { label: string; emoji: string }[] = []
+  if (confirmedAdoptions >= 1) badges.push({ label: "Familia Paws", emoji: "🏡" })
+  if (confirmedAdoptions >= 3) badges.push({ label: "Adoptante de corazón", emoji: "💞" })
+  if (totalDonated > 0) badges.push({ label: "Donador", emoji: "🤝" })
+  if (totalDonated >= 100000) badges.push({ label: "Donador estrella", emoji: "⭐" })
+
   return (
     <div className="min-h-screen bg-gray-50/50">
       {/* Hero */}
@@ -108,6 +114,17 @@ export function ProfilePage() {
               <p className="text-white/80 text-sm">Donado (confirmado)</p>
             </div>
           </div>
+
+          {/* Badges / logros */}
+          {badges.length > 0 && (
+            <div className="flex flex-wrap gap-2 mt-6">
+              {badges.map((b) => (
+                <span key={b.label} className="inline-flex items-center gap-1.5 bg-white/20 backdrop-blur text-white text-sm font-medium px-3 py-1.5 rounded-full">
+                  <span>{b.emoji}</span> {b.label}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 

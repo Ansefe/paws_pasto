@@ -42,6 +42,7 @@ interface PetFormState {
   good_with_kids: boolean
   good_with_pets: boolean
   main_photo_url: string
+  gallery_urls: string[]
 }
 
 const emptyForm: PetFormState = {
@@ -61,6 +62,7 @@ const emptyForm: PetFormState = {
   good_with_kids: false,
   good_with_pets: false,
   main_photo_url: "",
+  gallery_urls: [],
 }
 
 export function PetFormModal({ pet, isOpen, onClose, onSaved, lockedFoundationId }: PetFormModalProps) {
@@ -95,6 +97,7 @@ export function PetFormModal({ pet, isOpen, onClose, onSaved, lockedFoundationId
         good_with_kids: pet.good_with_kids ?? false,
         good_with_pets: pet.good_with_pets ?? false,
         main_photo_url: pet.main_photo_url || "",
+        gallery_urls: pet.gallery_urls || [],
       })
     } else {
       setForm({ ...emptyForm, foundation_id: lockedFoundationId ?? "" })
@@ -115,6 +118,30 @@ export function PetFormModal({ pet, isOpen, onClose, onSaved, lockedFoundationId
     } finally {
       setIsUploading(false)
     }
+  }
+
+  const handleGalleryChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? [])
+    e.target.value = ""
+    if (files.length === 0) return
+    setError(null)
+    setIsUploading(true)
+    try {
+      const urls: string[] = []
+      for (const file of files) {
+        urls.push(await uploadImage(file, "pets"))
+      }
+      setForm((prev) => ({ ...prev, gallery_urls: [...prev.gallery_urls, ...urls] }))
+    } catch (err) {
+      console.error("Error subiendo galería:", err)
+      setError(err instanceof Error ? err.message : "Error al subir las imágenes")
+    } finally {
+      setIsUploading(false)
+    }
+  }
+
+  const removeGalleryPhoto = (url: string) => {
+    setForm((prev) => ({ ...prev, gallery_urls: prev.gallery_urls.filter((u) => u !== url) }))
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -145,6 +172,7 @@ export function PetFormModal({ pet, isOpen, onClose, onSaved, lockedFoundationId
         good_with_kids: form.good_with_kids,
         good_with_pets: form.good_with_pets,
         main_photo_url: form.main_photo_url || null,
+        gallery_urls: form.gallery_urls,
       }
 
       if (isEdit && pet) {
@@ -246,6 +274,30 @@ export function PetFormModal({ pet, isOpen, onClose, onSaved, lockedFoundationId
                   </button>
                 )}
               </div>
+            </div>
+          </div>
+
+          {/* Galería de fotos adicionales */}
+          <div className="space-y-2">
+            <Label className="text-sm font-medium text-gray-700">Galería (fotos adicionales)</Label>
+            <div className="flex flex-wrap gap-2">
+              {form.gallery_urls.map((url) => (
+                <div key={url} className="relative w-20 h-20 rounded-xl overflow-hidden border border-gray-200">
+                  <img src={url} alt="Foto galería" className="w-full h-full object-cover" />
+                  <button
+                    type="button"
+                    onClick={() => removeGalleryPhoto(url)}
+                    disabled={busy}
+                    className="absolute top-0.5 right-0.5 w-5 h-5 bg-black/60 rounded-full flex items-center justify-center text-white"
+                  >
+                    <Trash2 className="w-3 h-3" />
+                  </button>
+                </div>
+              ))}
+              <label className="w-20 h-20 rounded-xl border-2 border-dashed border-gray-200 flex items-center justify-center cursor-pointer hover:border-cyan-300 transition-colors">
+                {isUploading ? <Loader2 className="w-5 h-5 animate-spin text-gray-400" /> : <ImagePlus className="w-6 h-6 text-gray-400" />}
+                <input type="file" accept="image/*" multiple onChange={handleGalleryChange} disabled={busy} className="hidden" />
+              </label>
             </div>
           </div>
 
